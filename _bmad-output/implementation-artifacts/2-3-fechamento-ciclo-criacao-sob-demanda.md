@@ -1,6 +1,6 @@
 # Story 2.3: Fechamento de Ciclo e Criacao Sob Demanda (Backend + Frontend)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -113,3 +113,4 @@ So that meu historico fica registrado e parcelas futuras sempre tem um ciclo des
 ## Change Log
 
 - 2026-02-27: Implemented Story 2.3 — Close endpoint, ensureCycleExists, CloseCycleDialog, frontend integration
+- 2026-02-27: Code review — Added safety limit to ensureCycleExists loop, added endDate>startDate validation to BillingCycleForm

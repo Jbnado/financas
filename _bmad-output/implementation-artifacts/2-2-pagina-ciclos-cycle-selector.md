@@ -1,6 +1,6 @@
 # Story 2.2: Pagina de Ciclos e CycleSelector (Frontend)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -130,3 +130,4 @@ So that sei em qual periodo estou visualizando minhas financas.
 ## Change Log
 
 - 2026-02-27: Implemented Story 2.2 — CycleSelector component, BillingCycleForm, page integration, Zustand store for selected cycle
+- 2026-02-27: Code review — Fixed render side effect (useEffect), exported query key constant, added closedAt to type
