@@ -35,6 +35,7 @@ export function CategoryFormDialog({ open, onClose, category }: CategoryFormDial
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<CategoryFormValues>({
     defaultValues: {
@@ -127,13 +128,9 @@ export function CategoryFormDialog({ open, onClose, category }: CategoryFormDial
                 className="w-12 h-10 p-1 cursor-pointer"
                 {...register('color')}
               />
-              <Input
-                {...register('color')}
-                placeholder="#f97316"
-                className="flex-1"
-                aria-hidden
-                tabIndex={-1}
-              />
+              <span className="flex-1 flex items-center text-sm text-muted-foreground px-3">
+                {watch('color') || DEFAULT_COLOR}
+              </span>
             </div>
           </div>
 
