@@ -1,6 +1,6 @@
 # Story 2.2: Pagina de Ciclos e CycleSelector (Frontend)
 
-Status: pending
+Status: done
 
 ## Story
 
@@ -20,38 +20,38 @@ So that sei em qual periodo estou visualizando minhas financas.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Criar tipos e hook de billing cycles (AC: 5)
-  - [ ] 1.1: Criar `src/features/billing-cycle/types.ts` com interfaces BillingCycle, BillingCycleSummary, CreateBillingCycleDto
-  - [ ] 1.2: Escrever testes (RED) para `use-billing-cycles.ts` — fetchAll, fetchById, create, navigation (next/prev)
-  - [ ] 1.3: Criar `src/features/billing-cycle/hooks/use-billing-cycles.ts` com TanStack Query: useQuery para lista, useQuery para ciclo individual, useMutation para criar
-  - [ ] 1.4: Criar `src/features/billing-cycle/hooks/use-cycle-navigation.ts` — estado do ciclo selecionado, funcoes goNext/goPrev, isFirst/isLast
-  - [ ] 1.5: Verificar testes passam (GREEN)
+- [x] Task 1: Criar tipos e hook de billing cycles (AC: 5)
+  - [x] 1.1: Criar `src/features/billing-cycle/types.ts` com interfaces BillingCycle, BillingCycleSummary, CreateBillingCycleDto
+  - [x] 1.2: Escrever testes (RED) para `use-billing-cycles.ts` — fetchAll, fetchById, create, navigation (next/prev)
+  - [x] 1.3: Criar `src/features/billing-cycle/hooks/use-billing-cycles.ts` com TanStack Query: useQuery para lista, useQuery para ciclo individual, useMutation para criar
+  - [x] 1.4: Criar `src/features/billing-cycle/hooks/use-cycle-navigation.ts` — estado do ciclo selecionado, funcoes goNext/goPrev, isFirst/isLast
+  - [x] 1.5: Verificar testes passam (GREEN) — 13 testes passando
 
-- [ ] Task 2: Criar componente CycleSelector (AC: 1, 2, 3)
-  - [ ] 2.1: Escrever testes (RED) para CycleSelector: renderiza datas formatadas, setas funcionam, seta desabilitada no limite, skeleton no loading
-  - [ ] 2.2: Criar `src/features/billing-cycle/components/CycleSelector.tsx` — chip com setas < >, label de datas, skeleton loading, estilo dark (bg #1e293b, border #334155, rounded-20px)
-  - [ ] 2.3: Formatar datas como "25/Jan — 24/Fev" usando Intl.DateTimeFormat pt-BR
-  - [ ] 2.4: Verificar testes passam (GREEN)
+- [x] Task 2: Criar componente CycleSelector (AC: 1, 2, 3)
+  - [x] 2.1: Escrever testes (RED) para CycleSelector: renderiza datas formatadas, setas funcionam, seta desabilitada no limite, skeleton no loading
+  - [x] 2.2: Criar `src/features/billing-cycle/components/CycleSelector.tsx` — chip com setas < >, label de datas, skeleton loading, estilo dark (bg #1e293b, border #334155, rounded-20px)
+  - [x] 2.3: Formatar datas como "25/Jan — 24/Fev" usando Intl.DateTimeFormat pt-BR
+  - [x] 2.4: Verificar testes passam (GREEN) — 6 testes passando
 
-- [ ] Task 3: Criar formulario de criacao de ciclo (AC: 6, 7)
-  - [ ] 3.1: Escrever testes (RED) para BillingCycleForm: campos presentes, validacao, submit
-  - [ ] 3.2: Criar `src/features/billing-cycle/components/BillingCycleForm.tsx` com React Hook Form — campos: nome (texto), data inicio (date), data fim (date), salario (numerico R$)
-  - [ ] 3.3: Usar Sheet no mobile (< 768px), Dialog no desktop (>= 768px) — criar wrapper `ResponsiveFormContainer.tsx` ou usar media query
-  - [ ] 3.4: Campo salario com inputMode="decimal" e mascara R$ (ex: "R$ 7.300,00")
-  - [ ] 3.5: Validacao: nome obrigatorio, datas obrigatorias (fim > inicio), salario > 0
-  - [ ] 3.6: Submit chama mutation de criar ciclo, fecha o form, toast de sucesso, invalida query
-  - [ ] 3.7: Verificar testes passam (GREEN)
+- [x] Task 3: Criar formulario de criacao de ciclo (AC: 6, 7)
+  - [x] 3.1: Escrever testes (RED) para BillingCycleForm: campos presentes, validacao, submit
+  - [x] 3.2: Criar `src/features/billing-cycle/components/BillingCycleForm.tsx` com React Hook Form — campos: nome (texto), data inicio (date), data fim (date), salario (numerico R$)
+  - [x] 3.3: Usar Sheet no mobile (< 768px), Dialog no desktop (>= 768px) — criado ResponsiveFormContainer.tsx com useMediaQuery hook
+  - [x] 3.4: Campo salario com inputMode="decimal" e mascara R$ (ex: "R$ 7.300,00")
+  - [x] 3.5: Validacao: nome obrigatorio, datas obrigatorias (fim > inicio), salario > 0
+  - [x] 3.6: Submit chama mutation de criar ciclo, fecha o form, toast de sucesso, invalida query
+  - [x] 3.7: Verificar testes passam (GREEN) — 6 testes passando
 
-- [ ] Task 4: Integrar CycleSelector nas paginas (AC: 1, 4)
-  - [ ] 4.1: Atualizar DashboardPage.tsx — adicionar CycleSelector no topo + empty state ("Crie seu primeiro ciclo" + CTA que abre form)
-  - [ ] 4.2: Atualizar TransacoesPage.tsx — adicionar CycleSelector no topo
-  - [ ] 4.3: Criar Zustand store ou contexto para ciclo selecionado (compartilhado entre paginas)
-  - [ ] 4.4: Escrever testes para empty state no Dashboard
+- [x] Task 4: Integrar CycleSelector nas paginas (AC: 1, 4)
+  - [x] 4.1: Atualizar DashboardPage.tsx — adicionar CycleSelector no topo + empty state ("Crie seu primeiro ciclo" + CTA que abre form)
+  - [x] 4.2: Atualizar TransacoesPage.tsx — adicionar CycleSelector no topo
+  - [x] 4.3: Criar Zustand store para ciclo selecionado (compartilhado entre paginas)
+  - [x] 4.4: Escrever testes para empty state no Dashboard — 2 testes passando
 
-- [ ] Task 5: Verificacao final (AC: 1-7)
-  - [ ] 5.1: Executar suite completa de testes frontend — todos passando
-  - [ ] 5.2: Verificar build TypeScript sem erros
-  - [ ] 5.3: Verificar build Vite de producao sem erros
+- [x] Task 5: Verificacao final (AC: 1-7)
+  - [x] 5.1: Executar suite completa de testes frontend — 112 testes passando
+  - [x] 5.2: Verificar build TypeScript sem erros
+  - [x] 5.3: Verificar build Vite de producao sem erros
 
 ## Dev Notes
 
@@ -89,3 +89,45 @@ So that sei em qual periodo estou visualizando minhas financas.
 ### API Service (shared/services/api.service.ts)
 - apiService.get<T>(url), .post<T>(url, data), .put<T>(url, data), .delete<T>(url)
 - Auto-attaches Bearer token, handles 401 refresh
+
+## Dev Agent Record
+
+### Implementation Notes
+- Criados types, hooks (useBillingCycles, useBillingCycle, useCreateBillingCycle, useCycleNavigation), componentes (CycleSelector, BillingCycleForm, ResponsiveFormContainer), Zustand store para ciclo selecionado
+- CycleSelector com chip dark style (#1e293b bg, #334155 border, rounded-20px), setas de navegacao, skeleton loading
+- BillingCycleForm usa React Hook Form com validacao, inputMode="decimal" para salario
+- ResponsiveFormContainer: Dialog no desktop (>=768px), Sheet no mobile (<768px) via useMediaQuery hook
+- Integrado CycleSelector em DashboardPage e TransacoesPage
+- Empty state no Dashboard com CTA "Crie seu primeiro ciclo"
+- Adicionado matchMedia mock no test setup para suporte a useMediaQuery em jsdom
+- Atualizado routes test para incluir QueryClientProvider e apiService mock
+
+### Completion Notes
+- 112 testes unitarios frontend passando (0 regressoes)
+- TypeScript build sem erros
+- Vite production build sem erros
+
+## File List
+
+- frontend/src/features/billing-cycle/types.ts (new)
+- frontend/src/features/billing-cycle/hooks/use-billing-cycles.ts (new)
+- frontend/src/features/billing-cycle/hooks/use-billing-cycles.test.tsx (new)
+- frontend/src/features/billing-cycle/hooks/use-cycle-navigation.ts (new)
+- frontend/src/features/billing-cycle/hooks/use-cycle-navigation.test.tsx (new)
+- frontend/src/features/billing-cycle/components/CycleSelector.tsx (new)
+- frontend/src/features/billing-cycle/components/CycleSelector.test.tsx (new)
+- frontend/src/features/billing-cycle/components/BillingCycleForm.tsx (new)
+- frontend/src/features/billing-cycle/components/BillingCycleForm.test.tsx (new)
+- frontend/src/features/billing-cycle/components/ResponsiveFormContainer.tsx (new)
+- frontend/src/features/billing-cycle/stores/cycle.store.ts (new)
+- frontend/src/features/dashboard/pages/DashboardPage.tsx (modified)
+- frontend/src/features/dashboard/pages/DashboardPage.test.tsx (new)
+- frontend/src/features/transaction/pages/TransacoesPage.tsx (modified)
+- frontend/src/shared/hooks/use-media-query.ts (new)
+- frontend/src/test/setup.ts (modified)
+- frontend/src/routes/index.test.tsx (modified)
+
+## Change Log
+
+- 2026-02-27: Implemented Story 2.2 — CycleSelector component, BillingCycleForm, page integration, Zustand store for selected cycle
+- 2026-02-27: Code review — Fixed render side effect (useEffect), exported query key constant, added closedAt to type

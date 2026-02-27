@@ -8,6 +8,7 @@ const mockService = {
   findAll: jest.fn(),
   findOne: jest.fn(),
   update: jest.fn(),
+  close: jest.fn(),
 };
 
 function mockReq(userId = "user-uuid-1") {
@@ -124,6 +125,35 @@ describe("BillingCycleController", () => {
 
       await expect(
         controller.update(mockReq(), "cycle-uuid-1", { name: "Test" }),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe("POST /billing-cycles/:id/close", () => {
+    it("should close an open cycle", async () => {
+      const closedCycle = {
+        ...mockCycle,
+        status: "closed",
+        closedAt: new Date(),
+      };
+      mockService.close.mockResolvedValue(closedCycle);
+
+      const result = await controller.close(mockReq(), "cycle-uuid-1");
+
+      expect(result.status).toBe("closed");
+      expect(mockService.close).toHaveBeenCalledWith(
+        "user-uuid-1",
+        "cycle-uuid-1",
+      );
+    });
+
+    it("should propagate BadRequestException for already closed cycle", async () => {
+      mockService.close.mockRejectedValue(
+        new BadRequestException("Ciclo já está fechado"),
+      );
+
+      await expect(
+        controller.close(mockReq(), "cycle-uuid-1"),
       ).rejects.toThrow(BadRequestException);
     });
   });

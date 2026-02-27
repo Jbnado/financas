@@ -77,4 +77,107 @@ export class BillingCycleService {
       },
     });
   }
+
+  async close(userId: string, id: string) {
+    const cycle = await this.prisma.billingCycle.findFirst({
+      where: { id, userId },
+    });
+
+    if (!cycle) {
+      throw new NotFoundException("Billing cycle not found");
+    }
+
+    if (cycle.status === "closed") {
+      throw new BadRequestException("Ciclo já está fechado");
+    }
+
+    return this.prisma.billingCycle.update({
+      where: { id },
+      data: {
+        status: "closed",
+        closedAt: new Date(),
+      },
+    });
+  }
+
+  async ensureCycleExists(userId: string, targetDate: Date) {
+    // Check if a cycle already contains the target date
+    const existing = await this.prisma.billingCycle.findFirst({
+      where: {
+        userId,
+        startDate: { lte: targetDate },
+        endDate: { gte: targetDate },
+      },
+    });
+
+    if (existing) {
+      return existing;
+    }
+
+    // Find the most recent cycle to base the new one on
+    const lastCycle = await this.prisma.billingCycle.findFirst({
+      where: { userId },
+      orderBy: { startDate: "desc" },
+    });
+
+    let newStartDate: Date;
+    let durationMs: number;
+    let salary: string | number = 0;
+
+    if (lastCycle) {
+      const lastStart = new Date(lastCycle.startDate);
+      const lastEnd = new Date(lastCycle.endDate);
+      durationMs = lastEnd.getTime() - lastStart.getTime();
+      salary = lastCycle.salary.toString();
+
+      // Start from the day after the last cycle's endDate
+      newStartDate = new Date(lastEnd.getTime() + 24 * 60 * 60 * 1000);
+    } else {
+      // No previous cycle: create a 30-day cycle starting from targetDate
+      durationMs = 30 * 24 * 60 * 60 * 1000;
+      newStartDate = targetDate;
+    }
+
+    // Create sequential cycles until we cover the target date
+    const MAX_CYCLES = 120; // safety limit: ~10 years of monthly cycles
+    let created;
+    for (let i = 0; i < MAX_CYCLES; i++) {
+      const newEndDate = new Date(newStartDate.getTime() + durationMs);
+      const monthNames = [
+        "Janeiro",
+        "Fevereiro",
+        "Março",
+        "Abril",
+        "Maio",
+        "Junho",
+        "Julho",
+        "Agosto",
+        "Setembro",
+        "Outubro",
+        "Novembro",
+        "Dezembro",
+      ];
+      const name = `Ciclo ${monthNames[newStartDate.getMonth()]}/${newStartDate.getFullYear()}`;
+
+      created = await this.prisma.billingCycle.create({
+        data: {
+          userId,
+          name,
+          startDate: newStartDate,
+          endDate: newEndDate,
+          salary,
+        },
+      });
+
+      if (newStartDate <= targetDate && newEndDate >= targetDate) {
+        return created;
+      }
+
+      newStartDate = new Date(newEndDate.getTime() + 24 * 60 * 60 * 1000);
+    }
+
+    throw new BadRequestException(
+      "Unable to create cycle: target date is too far from the last cycle",
+    );
+  }
 }
