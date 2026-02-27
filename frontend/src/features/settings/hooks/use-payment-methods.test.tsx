@@ -4,6 +4,10 @@ import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { usePaymentMethods } from './use-payment-methods'
 
+vi.mock('sonner', () => ({
+  toast: { success: vi.fn(), error: vi.fn() },
+}))
+
 vi.mock('@/shared/services/api.service', async () => {
   const actual = await vi.importActual<typeof import('@/shared/services/api.service')>('@/shared/services/api.service')
   return {
@@ -18,6 +22,7 @@ vi.mock('@/shared/services/api.service', async () => {
 })
 
 import { apiService } from '@/shared/services/api.service'
+import { toast } from 'sonner'
 
 const mockPaymentMethod = {
   id: 'pm-1',
@@ -52,7 +57,7 @@ describe('usePaymentMethods', () => {
     expect(apiService.get).toHaveBeenCalledWith('/payment-methods')
   })
 
-  it('should create a payment method', async () => {
+  it('should create a payment method and show success toast', async () => {
     vi.mocked(apiService.get).mockResolvedValue([])
     vi.mocked(apiService.post).mockResolvedValueOnce(mockPaymentMethod)
 
@@ -61,14 +66,30 @@ describe('usePaymentMethods', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
     await act(async () => {
-      result.current.createPaymentMethod({ name: 'Nubank', type: 'credit', dueDay: 15 })
+      await result.current.createPaymentMethod({ name: 'Nubank', type: 'credit', dueDay: 15 })
     })
 
-    await waitFor(() => expect(apiService.post).toHaveBeenCalledWith('/payment-methods', {
+    expect(apiService.post).toHaveBeenCalledWith('/payment-methods', {
       name: 'Nubank',
       type: 'credit',
       dueDay: 15,
-    }))
+    })
+    expect(toast.success).toHaveBeenCalledWith('Meio de pagamento criado')
+  })
+
+  it('should show error toast on create failure', async () => {
+    vi.mocked(apiService.get).mockResolvedValue([])
+    vi.mocked(apiService.post).mockRejectedValueOnce(new Error('fail'))
+
+    const { result } = renderHook(() => usePaymentMethods(), { wrapper: createWrapper() })
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+    await act(async () => {
+      await result.current.createPaymentMethod({ name: 'X', type: 'credit' }).catch(() => {})
+    })
+
+    expect(toast.error).toHaveBeenCalledWith('Erro ao criar meio de pagamento')
   })
 
   it('should update a payment method', async () => {
@@ -80,12 +101,13 @@ describe('usePaymentMethods', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
     await act(async () => {
-      result.current.updatePaymentMethod({ id: 'pm-1', data: { name: 'Nubank Gold' } })
+      await result.current.updatePaymentMethod({ id: 'pm-1', data: { name: 'Nubank Gold' } })
     })
 
-    await waitFor(() => expect(apiService.put).toHaveBeenCalledWith('/payment-methods/pm-1', {
+    expect(apiService.put).toHaveBeenCalledWith('/payment-methods/pm-1', {
       name: 'Nubank Gold',
-    }))
+    })
+    expect(toast.success).toHaveBeenCalledWith('Meio de pagamento atualizado')
   })
 
   it('should remove a payment method', async () => {
@@ -101,5 +123,6 @@ describe('usePaymentMethods', () => {
     })
 
     await waitFor(() => expect(apiService.delete).toHaveBeenCalledWith('/payment-methods/pm-1'))
+    expect(toast.success).toHaveBeenCalledWith('Meio de pagamento removido')
   })
 })

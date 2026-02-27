@@ -10,7 +10,7 @@ import {
 import { usePaymentMethods } from '../hooks/use-payment-methods'
 import { PaymentMethodList } from '../components/PaymentMethodList'
 import { PaymentMethodForm } from '../components/PaymentMethodForm'
-import type { PaymentMethod, CreatePaymentMethodData } from '../types'
+import type { PaymentMethod, CreatePaymentMethodData, UpdatePaymentMethodData } from '../types'
 
 export default function ConfigPage() {
   const {
@@ -34,14 +34,18 @@ export default function ConfigPage() {
     setDialogOpen(true)
   }
 
-  function handleSubmit(data: CreatePaymentMethodData) {
-    if (editingMethod) {
-      updatePaymentMethod({ id: editingMethod.id, data })
-    } else {
-      createPaymentMethod(data)
+  async function handleSubmit(data: CreatePaymentMethodData | UpdatePaymentMethodData) {
+    try {
+      if (editingMethod) {
+        await updatePaymentMethod({ id: editingMethod.id, data })
+      } else {
+        await createPaymentMethod(data as CreatePaymentMethodData)
+      }
+      setDialogOpen(false)
+      setEditingMethod(undefined)
+    } catch {
+      // toast is handled by mutation onError
     }
-    setDialogOpen(false)
-    setEditingMethod(undefined)
   }
 
   function handleCancel() {

@@ -2,10 +2,10 @@ import { useForm } from 'react-hook-form'
 import { useEffect } from 'react'
 import { Input } from '@/shared/components/ui/input'
 import { Button } from '@/shared/components/ui/button'
-import type { PaymentMethod, CreatePaymentMethodData } from '../types'
+import type { PaymentMethod, CreatePaymentMethodData, UpdatePaymentMethodData } from '../types'
 
 interface PaymentMethodFormProps {
-  onSubmit: (data: CreatePaymentMethodData) => void
+  onSubmit: (data: CreatePaymentMethodData | UpdatePaymentMethodData) => void
   onCancel: () => void
   editingMethod?: PaymentMethod
 }
@@ -31,24 +31,31 @@ export function PaymentMethodForm({ onSubmit, onCancel, editingMethod }: Payment
   })
 
   useEffect(() => {
-    if (editingMethod) {
-      reset({
-        name: editingMethod.name,
-        type: editingMethod.type,
-        dueDay: editingMethod.dueDay != null ? String(editingMethod.dueDay) : '',
-      })
-    }
+    reset({
+      name: editingMethod?.name ?? '',
+      type: editingMethod?.type ?? 'credit',
+      dueDay: editingMethod?.dueDay != null ? String(editingMethod.dueDay) : '',
+    })
   }, [editingMethod, reset])
 
   function onFormSubmit(values: FormValues) {
-    const data: CreatePaymentMethodData = {
-      name: values.name,
-      type: values.type,
+    if (editingMethod) {
+      const data: UpdatePaymentMethodData = {
+        name: values.name,
+        type: values.type,
+        dueDay: values.dueDay !== '' ? Number(values.dueDay) : null,
+      }
+      onSubmit(data)
+    } else {
+      const data: CreatePaymentMethodData = {
+        name: values.name,
+        type: values.type,
+      }
+      if (values.dueDay !== '') {
+        data.dueDay = Number(values.dueDay)
+      }
+      onSubmit(data)
     }
-    if (values.dueDay !== '') {
-      data.dueDay = Number(values.dueDay)
-    }
-    onSubmit(data)
   }
 
   return (

@@ -46,13 +46,14 @@ export class PaymentMethodService {
       throw new NotFoundException("Payment method not found");
     }
 
+    const data: Record<string, unknown> = {};
+    if (dto.name !== undefined) data.name = dto.name;
+    if (dto.type !== undefined) data.type = dto.type;
+    if ("dueDay" in dto) data.dueDay = dto.dueDay ?? null;
+
     return this.prisma.paymentMethod.update({
       where: { id },
-      data: {
-        ...(dto.name !== undefined && { name: dto.name }),
-        ...(dto.type !== undefined && { type: dto.type }),
-        ...(dto.dueDay !== undefined && { dueDay: dto.dueDay }),
-      },
+      data,
     });
   }
 

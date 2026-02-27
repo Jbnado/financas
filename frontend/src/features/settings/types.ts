@@ -17,5 +17,5 @@ export interface CreatePaymentMethodData {
 export interface UpdatePaymentMethodData {
   name?: string
   type?: 'credit' | 'debit'
-  dueDay?: number
+  dueDay?: number | null
 }

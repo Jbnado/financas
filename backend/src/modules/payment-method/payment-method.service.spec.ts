@@ -126,6 +126,24 @@ describe("PaymentMethodService", () => {
       expect(mockPrisma.paymentMethod.update).toHaveBeenCalled();
     });
 
+    it("should clear dueDay when set to null", async () => {
+      mockPrisma.paymentMethod.findFirst.mockResolvedValue(mockPaymentMethod);
+      mockPrisma.paymentMethod.update.mockResolvedValue({
+        ...mockPaymentMethod,
+        dueDay: null,
+      });
+
+      const result = await service.update(userId, "pm-uuid-1", {
+        dueDay: null,
+      });
+
+      expect(result.dueDay).toBeNull();
+      expect(mockPrisma.paymentMethod.update).toHaveBeenCalledWith({
+        where: { id: "pm-uuid-1" },
+        data: { dueDay: null },
+      });
+    });
+
     it("should throw NotFoundException when payment method not found", async () => {
       mockPrisma.paymentMethod.findFirst.mockResolvedValue(null);
 
