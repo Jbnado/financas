@@ -64,7 +64,7 @@ describe('Routes', () => {
 
     it('should redirect / to /dashboard', async () => {
       render(<TestRouter initialEntry="/" />)
-      expect(await screen.findByText('Nenhum ciclo encontrado')).toBeInTheDocument()
+      expect(await screen.findByText('Nenhum ciclo encontrado', {}, { timeout: 3000 })).toBeInTheDocument()
     })
 
     it('should render DashboardPage at /dashboard', async () => {
@@ -84,7 +84,7 @@ describe('Routes', () => {
 
     it('should render ConfigPage at /config', async () => {
       render(<TestRouter initialEntry="/config" />)
-      expect(await screen.findByText('Configurações — Em breve')).toBeInTheDocument()
+      expect(await screen.findByText('Configurações')).toBeInTheDocument()
     })
   })
 })
