@@ -14,7 +14,8 @@ model User {
   passwordHash  String         @map("password_hash")
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
-  billingCycles BillingCycle[]
+  billingCycles  BillingCycle[]
+  paymentMethods PaymentMethod[]
 
   @@map("users")
 }
@@ -39,4 +40,25 @@ model BillingCycle {
 
   @@index([userId])
   @@map("billing_cycles")
+}
+
+enum PaymentMethodType {
+  credit
+  debit
+}
+
+model PaymentMethod {
+  id        String            @id @default(uuid())
+  userId    String            @map("user_id")
+  name      String
+  type      PaymentMethodType
+  dueDay    Int?              @map("due_day")
+  isActive  Boolean           @default(true) @map("is_active")
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("payment_methods")
 }
