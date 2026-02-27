@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { CycleSelector } from '@/features/billing-cycle/components/CycleSelector'
 import { useBillingCycles } from '@/features/billing-cycle/hooks/use-billing-cycles'
 import { useCycleNavigation } from '@/features/billing-cycle/hooks/use-cycle-navigation'
@@ -15,9 +16,11 @@ export default function TransacoesPage() {
     goPrev,
   } = useCycleNavigation(cycles)
 
-  if (currentCycle) {
-    setSelectedCycleId(currentCycle.id)
-  }
+  useEffect(() => {
+    if (currentCycle) {
+      setSelectedCycleId(currentCycle.id)
+    }
+  }, [currentCycle, setSelectedCycleId])
 
   return (
     <div className="flex flex-1 flex-col p-4">

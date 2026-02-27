@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiService } from '@/shared/services/api.service'
 import type { BillingCycle, BillingCycleDetail, CreateBillingCycleDto } from '../types'
 
-const BILLING_CYCLES_KEY = ['billing-cycles'] as const
+export const BILLING_CYCLES_KEY = ['billing-cycles'] as const
 
 export function useBillingCycles() {
   return useQuery<BillingCycle[]>({

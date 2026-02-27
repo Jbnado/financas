@@ -139,8 +139,9 @@ export class BillingCycleService {
     }
 
     // Create sequential cycles until we cover the target date
+    const MAX_CYCLES = 120; // safety limit: ~10 years of monthly cycles
     let created;
-    while (true) {
+    for (let i = 0; i < MAX_CYCLES; i++) {
       const newEndDate = new Date(newStartDate.getTime() + durationMs);
       const monthNames = [
         "Janeiro",
@@ -174,5 +175,9 @@ export class BillingCycleService {
 
       newStartDate = new Date(newEndDate.getTime() + 24 * 60 * 60 * 1000);
     }
+
+    throw new BadRequestException(
+      "Unable to create cycle: target date is too far from the last cycle",
+    );
   }
 }

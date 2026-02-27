@@ -20,6 +20,7 @@ export function BillingCycleForm({ onSubmit, onCancel, isSubmitting }: BillingCy
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<FormValues>()
 
@@ -72,6 +73,11 @@ export function BillingCycleForm({ onSubmit, onCancel, isSubmitting }: BillingCy
           type="date"
           {...register('endDate', {
             required: 'Data fim é obrigatória',
+            validate: (v) => {
+              const start = getValues('startDate')
+              if (start && v && v <= start) return 'Data fim deve ser posterior à data início'
+              return true
+            },
           })}
         />
         {errors.endDate && (

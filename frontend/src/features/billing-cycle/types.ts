@@ -14,6 +14,7 @@ export interface BillingCycle {
   endDate: string
   salary: string
   status: 'open' | 'closed'
+  closedAt?: string
   createdAt: string
   updatedAt: string
 }

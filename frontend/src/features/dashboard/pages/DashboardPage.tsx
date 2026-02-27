@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/shared/components/ui/button'
@@ -27,6 +27,12 @@ export default function DashboardPage() {
     goNext,
     goPrev,
   } = useCycleNavigation(cycles)
+
+  useEffect(() => {
+    if (currentCycle) {
+      setSelectedCycleId(currentCycle.id)
+    }
+  }, [currentCycle, setSelectedCycleId])
 
   function handleCreate(data: CreateBillingCycleDto) {
     createMutation.mutate(data, {
@@ -70,10 +76,6 @@ export default function DashboardPage() {
         </ResponsiveFormContainer>
       </div>
     )
-  }
-
-  if (currentCycle) {
-    setSelectedCycleId(currentCycle.id)
   }
 
   return (
