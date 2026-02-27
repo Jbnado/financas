@@ -1,21 +1,40 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, useRoutes } from 'react-router'
 import { Suspense } from 'react'
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import { routes } from './index'
 import { useAuthStore } from '@/shared/stores/auth.store'
 import { clearAccessToken } from '@/shared/services/api.service'
 
+vi.mock('@/shared/services/api.service', async () => {
+  const actual = await vi.importActual<typeof import('@/shared/services/api.service')>('@/shared/services/api.service')
+  return {
+    ...actual,
+    apiService: {
+      get: vi.fn().mockResolvedValue([]),
+      post: vi.fn(),
+      put: vi.fn(),
+      delete: vi.fn(),
+    },
+  }
+})
+
 function TestRouter({ initialEntry }: { initialEntry: string }) {
+  const qc = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  })
   function Routes() {
     return useRoutes(routes)
   }
   return (
-    <MemoryRouter initialEntries={[initialEntry]}>
-      <Suspense fallback={<div>Loading...</div>}>
-        <Routes />
-      </Suspense>
-    </MemoryRouter>
+    <QueryClientProvider client={qc}>
+      <MemoryRouter initialEntries={[initialEntry]}>
+        <Suspense fallback={<div>Loading...</div>}>
+          <Routes />
+        </Suspense>
+      </MemoryRouter>
+    </QueryClientProvider>
   )
 }
 
@@ -64,7 +83,7 @@ describe('Routes', () => {
 
     it('should render ConfigPage at /config', async () => {
       render(<TestRouter initialEntry="/config" />)
-      expect(await screen.findByText('Configurações — Em breve')).toBeInTheDocument()
+      expect(await screen.findByText('Configurações')).toBeInTheDocument()
     })
   })
 })

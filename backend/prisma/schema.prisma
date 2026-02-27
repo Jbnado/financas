@@ -15,6 +15,7 @@ model User {
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
   billingCycles BillingCycle[]
+  categories    Category[]
 
   @@map("users")
 }
@@ -39,4 +40,20 @@ model BillingCycle {
 
   @@index([userId])
   @@map("billing_cycles")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String
+  icon      String?
+  color     String?
+  isActive  Boolean  @default(true) @map("is_active")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("categories")
 }

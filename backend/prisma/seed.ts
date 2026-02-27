@@ -17,9 +17,10 @@ async function main() {
     where: { email: adminEmail },
   });
 
-  if (!existing) {
+  let adminUser = existing;
+  if (!adminUser) {
     const passwordHash = await argon2.hash(adminPassword);
-    await prisma.user.create({
+    adminUser = await prisma.user.create({
       data: {
         email: adminEmail,
         passwordHash,
@@ -28,6 +29,40 @@ async function main() {
     console.log(`Seed: admin user created (${adminEmail})`);
   } else {
     console.log(`Seed: admin user already exists (${adminEmail})`);
+  }
+
+  const categories = [
+    { name: "Alimentação", icon: "utensils", color: "#f97316" },
+    { name: "Transporte", icon: "car", color: "#3b82f6" },
+    { name: "Moradia", icon: "home", color: "#8b5cf6" },
+    { name: "Lazer", icon: "gamepad-2", color: "#ec4899" },
+    { name: "Saúde", icon: "heart-pulse", color: "#ef4444" },
+    { name: "Educação", icon: "graduation-cap", color: "#14b8a6" },
+    { name: "Tecnologia", icon: "laptop", color: "#6366f1" },
+    { name: "Vestuário", icon: "shirt", color: "#f59e0b" },
+    { name: "Outros", icon: "ellipsis", color: "#6b7280" },
+  ];
+
+  const existingCategories = await prisma.category.findMany({
+    where: { userId: adminUser.id },
+  });
+
+  if (existingCategories.length === 0) {
+    for (const cat of categories) {
+      await prisma.category.create({
+        data: {
+          name: cat.name,
+          icon: cat.icon,
+          color: cat.color,
+          userId: adminUser.id,
+        },
+      });
+    }
+    console.log(`Seed: ${categories.length} categories created`);
+  } else {
+    console.log(
+      `Seed: categories already exist (${existingCategories.length} found)`,
+    );
   }
 
   await prisma.$disconnect();
