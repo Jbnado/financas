@@ -1,0 +1,42 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  passwordHash  String         @map("password_hash")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  billingCycles BillingCycle[]
+
+  @@map("users")
+}
+
+enum BillingCycleStatus {
+  open
+  closed
+}
+
+model BillingCycle {
+  id        String             @id @default(uuid())
+  userId    String             @map("user_id")
+  name      String
+  startDate DateTime           @map("start_date")
+  endDate   DateTime           @map("end_date")
+  salary    Decimal            @db.Decimal(15, 2)
+  status    BillingCycleStatus @default(open)
+  createdAt DateTime           @default(now()) @map("created_at")
+  updatedAt DateTime           @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("billing_cycles")
+}

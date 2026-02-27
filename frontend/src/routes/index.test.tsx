@@ -1,0 +1,70 @@
+import { describe, it, expect, beforeEach } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { MemoryRouter, useRoutes } from 'react-router'
+import { Suspense } from 'react'
+import { routes } from './index'
+import { useAuthStore } from '@/shared/stores/auth.store'
+import { clearAccessToken } from '@/shared/services/api.service'
+
+function TestRouter({ initialEntry }: { initialEntry: string }) {
+  function Routes() {
+    return useRoutes(routes)
+  }
+  return (
+    <MemoryRouter initialEntries={[initialEntry]}>
+      <Suspense fallback={<div>Loading...</div>}>
+        <Routes />
+      </Suspense>
+    </MemoryRouter>
+  )
+}
+
+describe('Routes', () => {
+  beforeEach(() => {
+    clearAccessToken()
+    useAuthStore.setState({ isAuthenticated: false })
+  })
+
+  describe('when not authenticated', () => {
+    it('should redirect /dashboard to /login', async () => {
+      render(<TestRouter initialEntry="/dashboard" />)
+      expect(await screen.findByText('Faça login para continuar')).toBeInTheDocument()
+    })
+
+    it('should show login page at /login', async () => {
+      render(<TestRouter initialEntry="/login" />)
+      expect(await screen.findByText('Faça login para continuar')).toBeInTheDocument()
+    })
+  })
+
+  describe('when authenticated', () => {
+    beforeEach(() => {
+      useAuthStore.getState().setAuthenticated('test-token')
+    })
+
+    it('should redirect / to /dashboard', async () => {
+      render(<TestRouter initialEntry="/" />)
+      expect(await screen.findByText(/Dashboard/)).toBeInTheDocument()
+    })
+
+    it('should render DashboardPage at /dashboard', async () => {
+      render(<TestRouter initialEntry="/dashboard" />)
+      expect(await screen.findByText('Dashboard — Em breve')).toBeInTheDocument()
+    })
+
+    it('should render TransacoesPage at /transacoes', async () => {
+      render(<TestRouter initialEntry="/transacoes" />)
+      expect(await screen.findByText('Transações — Em breve')).toBeInTheDocument()
+    })
+
+    it('should render AReceberPage at /a-receber', async () => {
+      render(<TestRouter initialEntry="/a-receber" />)
+      expect(await screen.findByText('A Receber — Em breve')).toBeInTheDocument()
+    })
+
+    it('should render ConfigPage at /config', async () => {
+      render(<TestRouter initialEntry="/config" />)
+      expect(await screen.findByText('Configurações — Em breve')).toBeInTheDocument()
+    })
+  })
+})
