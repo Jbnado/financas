@@ -9,12 +9,12 @@ export function useCategories() {
 
   const { data: categories, isLoading } = useQuery({
     queryKey: CATEGORIES_KEY,
-    queryFn: () => apiService.get<Category[]>('/api/categories'),
+    queryFn: () => apiService.get<Category[]>('/categories'),
   })
 
   const createMutation = useMutation({
     mutationFn: (input: CreateCategoryInput) =>
-      apiService.post<Category>('/api/categories', input),
+      apiService.post<Category>('/categories', input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CATEGORIES_KEY })
     },
@@ -22,7 +22,7 @@ export function useCategories() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateCategoryInput }) =>
-      apiService.put<Category>(`/api/categories/${id}`, data),
+      apiService.put<Category>(`/categories/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CATEGORIES_KEY })
     },
@@ -30,7 +30,7 @@ export function useCategories() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) =>
-      apiService.delete<Category>(`/api/categories/${id}`),
+      apiService.delete<Category>(`/categories/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CATEGORIES_KEY })
     },

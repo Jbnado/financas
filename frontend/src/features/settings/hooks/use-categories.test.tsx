@@ -66,7 +66,7 @@ describe('useCategories', () => {
       expect(result.current.categories).toEqual(mockCategories)
     })
 
-    expect(apiService.get).toHaveBeenCalledWith('/api/categories')
+    expect(apiService.get).toHaveBeenCalledWith('/categories')
   })
 
   it('should return loading state initially', () => {
@@ -99,7 +99,7 @@ describe('useCategories', () => {
       await result.current.createCategory({ name: 'Saúde', icon: 'heart-pulse', color: '#ef4444' })
     })
 
-    expect(apiService.post).toHaveBeenCalledWith('/api/categories', {
+    expect(apiService.post).toHaveBeenCalledWith('/categories', {
       name: 'Saúde',
       icon: 'heart-pulse',
       color: '#ef4444',
@@ -123,7 +123,7 @@ describe('useCategories', () => {
       await result.current.updateCategory({ id: 'cat-1', data: { name: 'Alimentação Atualizada' } })
     })
 
-    expect(apiService.put).toHaveBeenCalledWith('/api/categories/cat-1', {
+    expect(apiService.put).toHaveBeenCalledWith('/categories/cat-1', {
       name: 'Alimentação Atualizada',
     })
   })
@@ -142,6 +142,6 @@ describe('useCategories', () => {
       await result.current.deleteCategory('cat-1')
     })
 
-    expect(apiService.delete).toHaveBeenCalledWith('/api/categories/cat-1')
+    expect(apiService.delete).toHaveBeenCalledWith('/categories/cat-1')
   })
 })

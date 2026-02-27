@@ -111,7 +111,7 @@ describe('CategoryFormDialog', () => {
     await user.click(screen.getByRole('button', { name: 'Criar' }))
 
     await waitFor(() => {
-      expect(apiService.post).toHaveBeenCalledWith('/api/categories', expect.objectContaining({ name: 'Saúde' }))
+      expect(apiService.post).toHaveBeenCalledWith('/categories', expect.objectContaining({ name: 'Saúde' }))
     })
   })
 
@@ -142,7 +142,7 @@ describe('CategoryFormDialog', () => {
 
     await waitFor(() => {
       expect(apiService.put).toHaveBeenCalledWith(
-        '/api/categories/cat-1',
+        '/categories/cat-1',
         expect.objectContaining({ name: 'Alimentação Atualizada' }),
       )
     })
