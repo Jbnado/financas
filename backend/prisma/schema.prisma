@@ -32,6 +32,7 @@ model BillingCycle {
   endDate   DateTime           @map("end_date")
   salary    Decimal            @db.Decimal(15, 2)
   status    BillingCycleStatus @default(open)
+  closedAt  DateTime?          @map("closed_at")
   createdAt DateTime           @default(now()) @map("created_at")
   updatedAt DateTime           @updatedAt @map("updated_at")
 

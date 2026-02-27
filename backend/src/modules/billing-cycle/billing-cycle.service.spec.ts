@@ -146,4 +146,138 @@ describe("BillingCycleService", () => {
       ).rejects.toThrow(NotFoundException);
     });
   });
+
+  describe("close", () => {
+    it("should close an open cycle and set closedAt", async () => {
+      mockPrisma.billingCycle.findFirst.mockResolvedValue(mockCycle);
+      const closedCycle = {
+        ...mockCycle,
+        status: "closed",
+        closedAt: new Date(),
+      };
+      mockPrisma.billingCycle.update.mockResolvedValue(closedCycle);
+
+      const result = await service.close(userId, "cycle-uuid-1");
+
+      expect(result.status).toBe("closed");
+      expect(result.closedAt).toBeDefined();
+      expect(mockPrisma.billingCycle.update).toHaveBeenCalledWith({
+        where: { id: "cycle-uuid-1" },
+        data: {
+          status: "closed",
+          closedAt: expect.any(Date),
+        },
+      });
+    });
+
+    it("should throw BadRequestException when cycle is already closed", async () => {
+      mockPrisma.billingCycle.findFirst.mockResolvedValue({
+        ...mockCycle,
+        status: "closed",
+      });
+
+      await expect(
+        service.close(userId, "cycle-uuid-1"),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("should throw NotFoundException when cycle not found", async () => {
+      mockPrisma.billingCycle.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.close(userId, "nonexistent"),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe("ensureCycleExists", () => {
+    it("should return existing cycle that contains the target date", async () => {
+      mockPrisma.billingCycle.findFirst.mockResolvedValueOnce(mockCycle);
+
+      const result = await service.ensureCycleExists(
+        userId,
+        new Date("2026-02-01"),
+      );
+
+      expect(result.id).toBe("cycle-uuid-1");
+      expect(mockPrisma.billingCycle.create).not.toHaveBeenCalled();
+    });
+
+    it("should create a new cycle when no cycle contains the target date", async () => {
+      mockPrisma.billingCycle.findFirst
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(mockCycle);
+
+      const newCycle = {
+        id: "cycle-uuid-2",
+        userId,
+        name: "Ciclo Fevereiro/2026",
+        startDate: new Date("2026-02-25"),
+        endDate: new Date("2026-03-27"),
+        salary: decimal("7300.00"),
+        status: "open",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockPrisma.billingCycle.create.mockResolvedValue(newCycle);
+
+      const result = await service.ensureCycleExists(
+        userId,
+        new Date("2026-03-01"),
+      );
+
+      expect(result).toBeDefined();
+      expect(mockPrisma.billingCycle.create).toHaveBeenCalled();
+    });
+
+    it("should copy salary from previous cycle", async () => {
+      mockPrisma.billingCycle.findFirst
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(mockCycle);
+
+      const newCycle = {
+        ...mockCycle,
+        id: "cycle-uuid-new",
+        startDate: new Date("2026-02-25"),
+        endDate: new Date("2026-03-27"),
+      };
+      mockPrisma.billingCycle.create.mockResolvedValue(newCycle);
+
+      await service.ensureCycleExists(userId, new Date("2026-03-01"));
+
+      expect(mockPrisma.billingCycle.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            salary: "7300.00",
+          }),
+        }),
+      );
+    });
+
+    it("should create cycle with salary 0 when no previous cycle exists", async () => {
+      mockPrisma.billingCycle.findFirst
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(null);
+
+      const targetDate = new Date("2026-03-01");
+      const newCycle = {
+        ...mockCycle,
+        id: "cycle-uuid-new",
+        salary: decimal("0"),
+        startDate: targetDate,
+        endDate: new Date(targetDate.getTime() + 30 * 24 * 60 * 60 * 1000),
+      };
+      mockPrisma.billingCycle.create.mockResolvedValue(newCycle);
+
+      await service.ensureCycleExists(userId, targetDate);
+
+      expect(mockPrisma.billingCycle.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            salary: 0,
+          }),
+        }),
+      );
+    });
+  });
 });
