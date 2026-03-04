@@ -90,4 +90,18 @@ export class BillingCycleController {
     const user = req.user as { id: string };
     return this.service.close(user.id, id);
   }
+
+  @Post(":id/reopen")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Reopen a closed billing cycle" })
+  @ApiResponse({ status: 200, type: BillingCycleResponseDto })
+  @ApiResponse({ status: 400, description: "Cycle already open" })
+  @ApiResponse({ status: 404, description: "Billing cycle not found" })
+  async reopen(
+    @Req() req: Request,
+    @Param("id", ParseUUIDPipe) id: string,
+  ) {
+    const user = req.user as { id: string };
+    return this.service.reopen(user.id, id);
+  }
 }

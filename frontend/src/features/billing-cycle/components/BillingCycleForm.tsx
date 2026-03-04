@@ -1,7 +1,8 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
-import type { CreateBillingCycleDto } from '../types'
+import type { BillingCycle, CreateBillingCycleDto } from '../types'
 
 interface FormValues {
   name: string
@@ -14,15 +15,42 @@ interface BillingCycleFormProps {
   onSubmit: (data: CreateBillingCycleDto) => void
   onCancel: () => void
   isSubmitting: boolean
+  cycle?: BillingCycle | null
 }
 
-export function BillingCycleForm({ onSubmit, onCancel, isSubmitting }: BillingCycleFormProps) {
+function toDateInput(iso: string): string {
+  return iso.slice(0, 10)
+}
+
+function formatSalaryForDisplay(value: string | number): string {
+  const num = typeof value === 'string' ? parseFloat(value) : value
+  if (isNaN(num)) return ''
+  return num.toFixed(2).replace('.', ',')
+}
+
+export function BillingCycleForm({ onSubmit, onCancel, isSubmitting, cycle }: BillingCycleFormProps) {
+  const isEdit = !!cycle
+
   const {
     register,
     handleSubmit,
     getValues,
+    reset,
     formState: { errors },
   } = useForm<FormValues>()
+
+  useEffect(() => {
+    if (cycle) {
+      reset({
+        name: cycle.name,
+        startDate: toDateInput(cycle.startDate),
+        endDate: toDateInput(cycle.endDate),
+        salary: formatSalaryForDisplay(cycle.salary),
+      })
+    } else {
+      reset({ name: '', startDate: '', endDate: '', salary: '' })
+    }
+  }, [cycle, reset])
 
   function handleFormSubmit(values: FormValues) {
     const salary = values.salary.replace(/[R$\s.]/g, '').replace(',', '.')
@@ -111,7 +139,9 @@ export function BillingCycleForm({ onSubmit, onCancel, isSubmitting }: BillingCy
           Cancelar
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Criando...' : 'Criar'}
+          {isSubmitting
+            ? isEdit ? 'Salvando...' : 'Criando...'
+            : isEdit ? 'Salvar' : 'Criar'}
         </Button>
       </div>
     </form>

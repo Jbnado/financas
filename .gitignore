@@ -32,3 +32,24 @@ coverage/
 
 # Docker
 *.pid
+
+# Bmad
+.bmad/
+
+# Claude
+.claude/
+
+# GitHub
+.github/
+
+# worktree
+.worktree/
+.worktrees/
+
+# Playwright
+playwright-report/
+playwright-mcp/
+# Misc
+*.bak
+*.tmp
+*.temp

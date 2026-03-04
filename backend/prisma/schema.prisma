@@ -17,6 +17,10 @@ model User {
   billingCycles  BillingCycle[]
   categories     Category[]
   paymentMethods PaymentMethod[]
+  persons        Person[]
+  transactions   Transaction[]
+  fixedExpenses  FixedExpense[]
+  taxes          Tax[]
   bankAccounts       BankAccount[]
   investments        Investment[]
   patrimonySnapshots PatrimonySnapshot[]
@@ -30,16 +34,19 @@ enum BillingCycleStatus {
 }
 
 model BillingCycle {
-  id        String             @id @default(uuid())
-  userId    String             @map("user_id")
-  name      String
-  startDate DateTime           @map("start_date")
-  endDate   DateTime           @map("end_date")
-  salary    Decimal            @db.Decimal(15, 2)
-  status    BillingCycleStatus @default(open)
-  closedAt  DateTime?          @map("closed_at")
-  createdAt DateTime           @default(now()) @map("created_at")
-  updatedAt DateTime           @updatedAt @map("updated_at")
+  id           String             @id @default(uuid())
+  userId       String             @map("user_id")
+  name         String
+  startDate    DateTime           @map("start_date")
+  endDate      DateTime           @map("end_date")
+  salary       Decimal            @db.Decimal(15, 2)
+  status       BillingCycleStatus @default(open)
+  closedAt     DateTime?          @map("closed_at")
+  createdAt    DateTime           @default(now()) @map("created_at")
+  updatedAt    DateTime           @updatedAt @map("updated_at")
+  transactions        Transaction[]
+  fixedExpenseEntries  FixedExpenseEntry[]
+  taxEntries           TaxEntry[]
 
   user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   patrimonySnapshot PatrimonySnapshot?
@@ -49,14 +56,15 @@ model BillingCycle {
 }
 
 model Category {
-  id        String   @id @default(uuid())
-  name      String
-  icon      String?
-  color     String?
-  isActive  Boolean  @default(true) @map("is_active")
-  userId    String   @map("user_id")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id           String        @id @default(uuid())
+  name         String
+  icon         String?
+  color        String?
+  isActive     Boolean       @default(true) @map("is_active")
+  userId       String        @map("user_id")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  transactions Transaction[]
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -70,19 +78,180 @@ enum PaymentMethodType {
 }
 
 model PaymentMethod {
-  id        String            @id @default(uuid())
-  userId    String            @map("user_id")
-  name      String
-  type      PaymentMethodType
-  dueDay    Int?              @map("due_day")
-  isActive  Boolean           @default(true) @map("is_active")
-  createdAt DateTime          @default(now()) @map("created_at")
-  updatedAt DateTime          @updatedAt @map("updated_at")
+  id           String            @id @default(uuid())
+  userId       String            @map("user_id")
+  name         String
+  type         PaymentMethodType
+  dueDay       Int?              @map("due_day")
+  isActive     Boolean           @default(true) @map("is_active")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  updatedAt    DateTime          @updatedAt @map("updated_at")
+  transactions Transaction[]
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("payment_methods")
+}
+
+model Person {
+  id          String       @id @default(uuid())
+  name        String
+  isActive    Boolean      @default(true) @map("is_active")
+  userId      String       @map("user_id")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  splits      Split[]
+  receivables Receivable[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("persons")
+}
+
+model Transaction {
+  id                  String    @id @default(uuid())
+  description         String
+  amount              Decimal   @db.Decimal(15, 2)
+  date                DateTime
+  isPaid              Boolean   @default(false) @map("is_paid")
+  installmentNumber   Int?      @map("installment_number")
+  totalInstallments   Int?      @map("total_installments")
+  userId              String    @map("user_id")
+  billingCycleId      String    @map("billing_cycle_id")
+  categoryId          String    @map("category_id")
+  paymentMethodId     String    @map("payment_method_id")
+  parentTransactionId String?   @map("parent_transaction_id")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  billingCycle  BillingCycle  @relation(fields: [billingCycleId], references: [id])
+  category      Category      @relation(fields: [categoryId], references: [id])
+  paymentMethod PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  parent        Transaction?  @relation("TransactionInstallments", fields: [parentTransactionId], references: [id])
+  children      Transaction[] @relation("TransactionInstallments")
+  splits        Split[]
+
+  @@index([userId])
+  @@index([billingCycleId])
+  @@map("transactions")
+}
+
+model Split {
+  id            String       @id @default(uuid())
+  transactionId String       @map("transaction_id")
+  personId      String       @map("person_id")
+  amount        Decimal      @db.Decimal(15, 2)
+  createdAt     DateTime     @default(now()) @map("created_at")
+  receivables   Receivable[]
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  person      Person      @relation(fields: [personId], references: [id])
+
+  @@index([transactionId])
+  @@map("splits")
+}
+
+model Receivable {
+  id         String               @id @default(uuid())
+  splitId    String               @map("split_id")
+  personId   String               @map("person_id")
+  amount     Decimal              @db.Decimal(15, 2)
+  paidAmount Decimal              @default(0) @map("paid_amount") @db.Decimal(15, 2)
+  status     String               @default("pending")
+  payments   ReceivablePayment[]
+  createdAt  DateTime             @default(now()) @map("created_at")
+  updatedAt  DateTime             @updatedAt @map("updated_at")
+
+  split  Split  @relation(fields: [splitId], references: [id], onDelete: Cascade)
+  person Person @relation(fields: [personId], references: [id])
+
+  @@index([splitId])
+  @@index([personId])
+  @@map("receivables")
+}
+
+model ReceivablePayment {
+  id           String   @id @default(uuid())
+  receivableId String   @map("receivable_id")
+  amount       Decimal  @db.Decimal(15, 2)
+  paidAt       DateTime @map("paid_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  receivable Receivable @relation(fields: [receivableId], references: [id], onDelete: Cascade)
+
+  @@index([receivableId])
+  @@map("receivable_payments")
+}
+
+model FixedExpense {
+  id              String             @id @default(uuid())
+  name            String
+  estimatedAmount Decimal            @map("estimated_amount") @db.Decimal(15, 2)
+  dueDay          Int                @map("due_day")
+  isActive        Boolean            @default(true) @map("is_active")
+  userId          String             @map("user_id")
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+  entries         FixedExpenseEntry[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("fixed_expenses")
+}
+
+model FixedExpenseEntry {
+  id             String   @id @default(uuid())
+  fixedExpenseId String   @map("fixed_expense_id")
+  billingCycleId String   @map("billing_cycle_id")
+  actualAmount   Decimal  @map("actual_amount") @db.Decimal(15, 2)
+  isPaid         Boolean  @default(false) @map("is_paid")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  fixedExpense FixedExpense @relation(fields: [fixedExpenseId], references: [id], onDelete: Cascade)
+  billingCycle BillingCycle @relation(fields: [billingCycleId], references: [id])
+
+  @@index([fixedExpenseId])
+  @@index([billingCycleId])
+  @@map("fixed_expense_entries")
+}
+
+model Tax {
+  id              String     @id @default(uuid())
+  name            String
+  rate            Decimal    @db.Decimal(5, 2)
+  estimatedAmount Decimal    @map("estimated_amount") @db.Decimal(15, 2)
+  isActive        Boolean    @default(true) @map("is_active")
+  userId          String     @map("user_id")
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+  entries         TaxEntry[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("taxes")
+}
+
+model TaxEntry {
+  id             String   @id @default(uuid())
+  taxId          String   @map("tax_id")
+  billingCycleId String   @map("billing_cycle_id")
+  actualAmount   Decimal  @map("actual_amount") @db.Decimal(15, 2)
+  isPaid         Boolean  @default(false) @map("is_paid")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  tax          Tax          @relation(fields: [taxId], references: [id], onDelete: Cascade)
+  billingCycle BillingCycle @relation(fields: [billingCycleId], references: [id])
+
+  @@index([taxId])
+  @@index([billingCycleId])
+  @@map("tax_entries")
 }
 
 enum BankAccountType {

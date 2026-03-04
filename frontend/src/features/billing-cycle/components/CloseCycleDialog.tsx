@@ -29,8 +29,8 @@ export function CloseCycleDialog({
         <DialogHeader>
           <DialogTitle>Fechar ciclo {cycleName}?</DialogTitle>
           <DialogDescription>
-            Esta ação não pode ser desfeita. O ciclo será marcado como fechado e
-            não poderá mais ser editado.
+            O ciclo será marcado como fechado e não poderá ser editado até ser
+            reaberto.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

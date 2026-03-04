@@ -90,4 +90,38 @@ describe('BillingCycleForm', () => {
     const salaryInput = screen.getByLabelText(/salário/i)
     expect(salaryInput).toHaveAttribute('inputMode', 'decimal')
   })
+
+  describe('edit mode', () => {
+    const mockCycle = {
+      id: 'cycle-1',
+      name: 'Fevereiro 2026',
+      startDate: '2026-01-25T00:00:00.000Z',
+      endDate: '2026-02-24T00:00:00.000Z',
+      salary: '7300.00',
+      status: 'open' as const,
+      createdAt: '2026-01-20T00:00:00.000Z',
+      updatedAt: '2026-01-20T00:00:00.000Z',
+    }
+
+    it('should pre-fill form fields in edit mode', () => {
+      render(<BillingCycleForm {...defaultProps} cycle={mockCycle} />)
+
+      expect(screen.getByLabelText(/nome/i)).toHaveValue('Fevereiro 2026')
+      expect(screen.getByLabelText(/data início/i)).toHaveValue('2026-01-25')
+      expect(screen.getByLabelText(/data fim/i)).toHaveValue('2026-02-24')
+      expect(screen.getByLabelText(/salário/i)).toHaveValue('7300,00')
+    })
+
+    it('should show "Salvar" button in edit mode', () => {
+      render(<BillingCycleForm {...defaultProps} cycle={mockCycle} />)
+
+      expect(screen.getByRole('button', { name: /salvar/i })).toBeInTheDocument()
+    })
+
+    it('should show "Salvando..." when submitting in edit mode', () => {
+      render(<BillingCycleForm {...defaultProps} cycle={mockCycle} isSubmitting={true} />)
+
+      expect(screen.getByRole('button', { name: /salvando/i })).toBeDisabled()
+    })
+  })
 })

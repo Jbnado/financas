@@ -303,7 +303,7 @@ test.describe('Patrimônio - Epic 10', () => {
     })
 
     // Close the cycle
-    const closeRes = await request.post(`${process.env.API_BASE_URL || 'http://localhost:3001/api'}/billing-cycles/${cycle.id}/close`, {
+    const closeRes = await request.post(`${process.env.E2E_API_BASE || 'http://localhost:3000/api'}/billing-cycles/${cycle.id}/close`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     expect(closeRes.ok()).toBeTruthy()

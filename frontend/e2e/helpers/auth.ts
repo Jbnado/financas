@@ -1,6 +1,6 @@
 import { expect, type APIRequestContext, type Page } from '@playwright/test'
 
-const API_BASE = process.env.API_BASE_URL || 'http://localhost:3001/api'
+const API_BASE = process.env.E2E_API_BASE || 'http://localhost:3000/api'
 
 export function generateTestUser() {
   return {

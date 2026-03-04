@@ -6,6 +6,12 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [tailwindcss(), react()],
+  server: {
+    host: true,
+    watch: {
+      usePolling: true,
+    },
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

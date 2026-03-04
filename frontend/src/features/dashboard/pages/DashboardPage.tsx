@@ -6,17 +6,20 @@ import { CycleSelector } from '@/features/billing-cycle/components/CycleSelector
 import { BillingCycleForm } from '@/features/billing-cycle/components/BillingCycleForm'
 import { CloseCycleDialog } from '@/features/billing-cycle/components/CloseCycleDialog'
 import { ResponsiveFormContainer } from '@/features/billing-cycle/components/ResponsiveFormContainer'
-import { useBillingCycles, useCreateBillingCycle } from '@/features/billing-cycle/hooks/use-billing-cycles'
+import { useBillingCycles, useCreateBillingCycle, useUpdateBillingCycle } from '@/features/billing-cycle/hooks/use-billing-cycles'
 import { useCloseBillingCycle } from '@/features/billing-cycle/hooks/use-close-billing-cycle'
 import { useCycleNavigation } from '@/features/billing-cycle/hooks/use-cycle-navigation'
 import { useCycleStore } from '@/features/billing-cycle/stores/cycle.store'
+import { DashboardContent } from '../components/DashboardContent'
 import type { CreateBillingCycleDto } from '@/features/billing-cycle/types'
 
 export default function DashboardPage() {
   const [formOpen, setFormOpen] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(false)
   const [closeDialogOpen, setCloseDialogOpen] = useState(false)
   const { data: cycles = [], isLoading } = useBillingCycles()
   const createMutation = useCreateBillingCycle()
+  const updateMutation = useUpdateBillingCycle()
   const closeMutation = useCloseBillingCycle()
   const setSelectedCycleId = useCycleStore((s) => s.setSelectedCycleId)
 
@@ -34,13 +37,35 @@ export default function DashboardPage() {
     }
   }, [currentCycle, setSelectedCycleId])
 
-  function handleCreate(data: CreateBillingCycleDto) {
-    createMutation.mutate(data, {
-      onSuccess: () => {
-        setFormOpen(false)
-        toast.success('Ciclo criado com sucesso')
-      },
-    })
+  function handleOpenCreate() {
+    setIsEditMode(false)
+    setFormOpen(true)
+  }
+
+  function handleOpenEdit() {
+    setIsEditMode(true)
+    setFormOpen(true)
+  }
+
+  function handleSubmit(data: CreateBillingCycleDto) {
+    if (isEditMode && currentCycle) {
+      updateMutation.mutate(
+        { id: currentCycle.id, dto: data },
+        {
+          onSuccess: () => {
+            setFormOpen(false)
+            toast.success('Ciclo atualizado')
+          },
+        },
+      )
+    } else {
+      createMutation.mutate(data, {
+        onSuccess: () => {
+          setFormOpen(false)
+          toast.success('Ciclo criado com sucesso')
+        },
+      })
+    }
   }
 
   function handleClose() {
@@ -58,7 +83,7 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 p-4">
         <p className="text-lg text-muted-foreground">Nenhum ciclo encontrado</p>
-        <Button onClick={() => setFormOpen(true)}>
+        <Button onClick={handleOpenCreate}>
           <Plus className="mr-2 h-4 w-4" />
           Crie seu primeiro ciclo
         </Button>
@@ -69,7 +94,7 @@ export default function DashboardPage() {
           description="Crie um novo ciclo de fatura"
         >
           <BillingCycleForm
-            onSubmit={handleCreate}
+            onSubmit={handleSubmit}
             onCancel={() => setFormOpen(false)}
             isSubmitting={createMutation.isPending}
           />
@@ -80,30 +105,23 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-1 flex-col p-4">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-center">
         <CycleSelector
           startDate={currentCycle?.startDate ?? ''}
           endDate={currentCycle?.endDate ?? ''}
+          cycleName={currentCycle?.name}
+          cycleStatus={currentCycle?.status}
           isFirst={isFirst}
           isLast={isLast}
           isLoading={isLoading}
           onPrev={goPrev}
           onNext={goNext}
+          onEdit={handleOpenEdit}
+          onNew={handleOpenCreate}
         />
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setFormOpen(true)}
-          aria-label="Novo ciclo"
-          className="h-10 w-10"
-        >
-          <Plus className="h-5 w-5" />
-        </Button>
       </div>
 
-      <div className="flex flex-1 items-center justify-center">
-        <p className="text-lg text-muted-foreground">Dashboard — Em breve</p>
-      </div>
+      <DashboardContent cycleId={currentCycle?.id} />
 
       {currentCycle?.status === 'open' && (
         <div className="mt-4 flex justify-center pb-4">
@@ -119,13 +137,14 @@ export default function DashboardPage() {
       <ResponsiveFormContainer
         open={formOpen}
         onOpenChange={setFormOpen}
-        title="Novo Ciclo"
-        description="Crie um novo ciclo de fatura"
+        title={isEditMode ? 'Editar Ciclo' : 'Novo Ciclo'}
+        description={isEditMode ? 'Altere os dados do ciclo.' : 'Crie um novo ciclo de fatura'}
       >
         <BillingCycleForm
-          onSubmit={handleCreate}
+          onSubmit={handleSubmit}
           onCancel={() => setFormOpen(false)}
-          isSubmitting={createMutation.isPending}
+          isSubmitting={createMutation.isPending || updateMutation.isPending}
+          cycle={isEditMode ? currentCycle : null}
         />
       </ResponsiveFormContainer>
 

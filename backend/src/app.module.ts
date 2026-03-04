@@ -6,13 +6,21 @@ import { AuthModule } from "./modules/auth/auth.module.js";
 import { BillingCycleModule } from "./modules/billing-cycle/billing-cycle.module.js";
 import { CategoryModule } from "./modules/category/category.module.js";
 import { PaymentMethodModule } from "./modules/payment-method/payment-method.module.js";
+import { PersonModule } from "./modules/person/person.module.js";
+import { TransactionModule } from "./modules/transaction/transaction.module.js";
+import { SplitModule } from "./modules/split/split.module.js";
+import { ReceivableModule } from "./modules/receivable/receivable.module.js";
+import { FixedExpenseModule } from "./modules/fixed-expense/fixed-expense.module.js";
+import { TaxModule } from "./modules/tax/tax.module.js";
+import { ReportModule } from "./modules/report/report.module.js";
+import { ProjectionModule } from "./modules/projection/projection.module.js";
 import { BankAccountModule } from "./modules/bank-account/bank-account.module.js";
 import { InvestmentModule } from "./modules/investment/investment.module.js";
 import { PatrimonyModule } from "./modules/patrimony/patrimony.module.js";
 import { JwtAuthGuard } from "./modules/auth/guards/jwt-auth.guard.js";
 
 @Module({
-  imports: [PrismaModule, AuthModule, HealthModule, BillingCycleModule, CategoryModule, PaymentMethodModule, BankAccountModule, InvestmentModule, PatrimonyModule],
+  imports: [PrismaModule, AuthModule, HealthModule, BillingCycleModule, CategoryModule, PaymentMethodModule, PersonModule, TransactionModule, SplitModule, ReceivableModule, FixedExpenseModule, TaxModule, ReportModule, ProjectionModule, BankAccountModule, InvestmentModule, PatrimonyModule],
   providers: [
     {
       provide: APP_GUARD,
