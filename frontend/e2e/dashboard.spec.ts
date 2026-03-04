@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { generateTestUser, registerUser, getAuthToken, loginViaUI } from './helpers/auth'
 import {
+  apiGet,
   createBillingCycle,
   createCategory,
   createPaymentMethod,
@@ -107,9 +108,7 @@ test.describe('Dashboard', () => {
     const person = await createPerson(request, token, { name: 'João' })
 
     // Get the Março cycle ID via API
-    const cycles = await (await request.get('http://localhost:3000/api/billing-cycles', {
-      headers: { Authorization: `Bearer ${token}` },
-    })).json() as Array<{ id: string; name: string }>
+    const cycles = await apiGet<Array<{ id: string; name: string }>>(request, '/billing-cycles', token)
     const marcoCycle = cycles.find((c) => c.name === 'Março 2026')!
 
     const tx = await createTransaction(request, token, {

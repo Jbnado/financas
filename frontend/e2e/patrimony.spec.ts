@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { generateTestUser, registerUser, getAuthToken, loginViaUI, navigateTo } from './helpers/auth'
-import { createBankAccount, createInvestment, createBillingCycle, apiGet, apiPatch, apiDelete } from './helpers/api'
+import { createBankAccount, createInvestment, createBillingCycle, apiGet, apiPost, apiPatch, apiDelete } from './helpers/api'
 
 const TEST_USER = generateTestUser()
 let token: string
@@ -303,10 +303,7 @@ test.describe('Patrimônio - Epic 10', () => {
     })
 
     // Close the cycle
-    const closeRes = await request.post(`${process.env.E2E_API_BASE || 'http://localhost:3000/api'}/billing-cycles/${cycle.id}/close`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    expect(closeRes.ok()).toBeTruthy()
+    await apiPost(request, `/billing-cycles/${cycle.id}/close`, token, {})
 
     // Check evolution now has a snapshot
     const evolution = await apiGet<{

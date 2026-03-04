@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { generateTestUser, registerUser, getAuthToken, loginViaUI, navigateTo } from './helpers/auth'
-import { createBillingCycle, createCategory, createPaymentMethod, createTransaction } from './helpers/api'
+import { apiGet, createBillingCycle, createCategory, createPaymentMethod, createTransaction } from './helpers/api'
 
 /**
  * E2E tests for billing cycle navigation arrows.
@@ -118,9 +118,7 @@ test.describe('Cycle Navigation', () => {
     const pm = await createPaymentMethod(request, token, { name: 'Nav Card', type: 'debit' })
 
     // Get cycles to reference by ID
-    const cycles = await (await request.get('http://localhost:3000/api/billing-cycles', {
-      headers: { Authorization: `Bearer ${token}` },
-    })).json() as Array<{ id: string; name: string }>
+    const cycles = await apiGet<Array<{ id: string; name: string }>>(request, '/billing-cycles', token)
 
     const marchCycle = cycles.find((c) => c.name === 'Março 2026')!
     const janCycle = cycles.find((c) => c.name === 'Janeiro 2026')!

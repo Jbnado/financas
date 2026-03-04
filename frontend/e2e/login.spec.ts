@@ -1,20 +1,13 @@
 import { test, expect } from '@playwright/test'
+import { generateTestUser, registerUser } from './helpers/auth'
 
-const TEST_USER = {
-  email: `e2e-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@test.com`,
-  password: 'Test1234!',
-}
+const TEST_USER = generateTestUser()
 
 test.describe('Login Flow', () => {
   test.describe.configure({ mode: 'serial' })
 
   test.beforeAll(async ({ request }) => {
-    // Register a fresh test user via API
-    const res = await request.post('http://localhost:3000/api/auth/register', {
-      data: { email: TEST_USER.email, password: TEST_USER.password },
-    })
-    // Accept 201 (created) or 409 (already exists)
-    expect([200, 201, 409]).toContain(res.status())
+    await registerUser(request, TEST_USER)
   })
 
   test('unauthenticated user is redirected to /login', async ({ page }) => {

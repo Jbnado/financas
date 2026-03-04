@@ -1,12 +1,14 @@
 import { test, expect } from '@playwright/test'
 import { generateTestUser, registerUser, getAuthToken, loginViaUI, navigateTo } from './helpers/auth'
 import {
+  apiPatch,
   createCategory,
   createPaymentMethod,
   createBillingCycle,
   createPerson,
   createTransaction,
   createSplits,
+  toggleTransactionPaid,
 } from './helpers/api'
 
 /**
@@ -328,10 +330,7 @@ test.describe('UX Scenarios', () => {
     })
 
     // Mark first as paid
-    await request.patch(`http://localhost:3000/api/transactions/${txPaid.id}/toggle-paid`, {
-      data: {},
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    await toggleTransactionPaid(request, token, txPaid.id)
 
     await loginViaUI(page, user)
     await navigateTo(page, 'Transações', /\/transacoes/)
