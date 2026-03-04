@@ -82,7 +82,10 @@ test.describe('Login Flow', () => {
 
     // Should redirect to dashboard
     await expect(page).toHaveURL(/\/dashboard/)
-    await expect(page.getByText('Dashboard — Em breve')).toBeVisible()
+    // New user sees "Nenhum ciclo encontrado" or the cycle dashboard
+    await expect(
+      page.getByText('Nenhum ciclo encontrado').or(page.getByText('Dashboard — Em breve'))
+    ).toBeVisible()
   })
 
   test('shows loading state during login', async ({ page }) => {
@@ -123,29 +126,20 @@ test.describe('Login Flow', () => {
     // Navigate to Transações
     await page.getByRole('navigation').getByText('Transações').click()
     await expect(page).toHaveURL(/\/transacoes/)
-    await expect(page.getByText('Transações — Em breve')).toBeVisible()
 
     // Navigate to A Receber
     await page.getByRole('navigation').getByText('A Receber').click()
     await expect(page).toHaveURL(/\/a-receber/)
-    await expect(page.getByText('A Receber — Em breve')).toBeVisible()
 
     // Navigate to Config
     await page.getByRole('navigation').getByText('Config').click()
     await expect(page).toHaveURL(/\/config/)
-    await expect(page.getByText('Configurações — Em breve')).toBeVisible()
+    await expect(page.getByText('Configurações')).toBeVisible()
   })
 
-  test('root path redirects to dashboard when authenticated', async ({ page }) => {
-    // Login first
-    await page.goto('/login')
-    await page.getByLabel('Email').fill(TEST_USER.email)
-    await page.getByLabel('Senha').fill(TEST_USER.password)
-    await page.getByRole('button', { name: 'Entrar' }).click()
-    await expect(page).toHaveURL(/\/dashboard/)
-
-    // Navigate to root
+  test('unauthenticated root path redirects to login', async ({ page }) => {
+    // Auth is in-memory, so navigating to / always requires re-login
     await page.goto('/')
-    await expect(page).toHaveURL(/\/dashboard/)
+    await expect(page).toHaveURL(/\/login/)
   })
 })

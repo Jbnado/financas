@@ -1,7 +1,13 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
-import { useBillingCycles, useBillingCycle, useCreateBillingCycle } from './use-billing-cycles'
+import {
+  useBillingCycles,
+  useBillingCycle,
+  useCreateBillingCycle,
+  useUpdateBillingCycle,
+  useReopenBillingCycle,
+} from './use-billing-cycles'
 import { apiService } from '@/shared/services/api.service'
 import type { BillingCycle, BillingCycleDetail } from '../types'
 
@@ -9,6 +15,7 @@ vi.mock('@/shared/services/api.service', () => ({
   apiService: {
     get: vi.fn(),
     post: vi.fn(),
+    put: vi.fn(),
   },
 }))
 
@@ -131,5 +138,52 @@ describe('useCreateBillingCycle', () => {
       endDate: '2026-02-24T00:00:00.000Z',
       salary: '7300.00',
     })
+  })
+})
+
+describe('useUpdateBillingCycle', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('should update a billing cycle', async () => {
+    const updatedCycle = { ...mockCycles[0], name: 'Março 2026' }
+    vi.mocked(apiService.put).mockResolvedValue(updatedCycle)
+
+    const { result } = renderHook(() => useUpdateBillingCycle(), {
+      wrapper: createWrapper(),
+    })
+
+    result.current.mutate({
+      id: 'cycle-1',
+      dto: { name: 'Março 2026' },
+    })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(apiService.put).toHaveBeenCalledWith('/billing-cycles/cycle-1', {
+      name: 'Março 2026',
+    })
+  })
+})
+
+describe('useReopenBillingCycle', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('should reopen a billing cycle', async () => {
+    const reopenedCycle = { ...mockCycles[1], status: 'open', closedAt: null }
+    vi.mocked(apiService.post).mockResolvedValue(reopenedCycle)
+
+    const { result } = renderHook(() => useReopenBillingCycle(), {
+      wrapper: createWrapper(),
+    })
+
+    result.current.mutate('cycle-2')
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(apiService.post).toHaveBeenCalledWith('/billing-cycles/cycle-2/reopen')
   })
 })

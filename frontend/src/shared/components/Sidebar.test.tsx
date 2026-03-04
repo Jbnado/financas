@@ -18,11 +18,13 @@ describe('Sidebar', () => {
     useUIStore.setState({ activeTab: 'dashboard' })
   })
 
-  it('should render 4 navigation items', () => {
+  it('should render 6 navigation items', () => {
     renderWithRouter()
     expect(screen.getByText('Dashboard')).toBeInTheDocument()
     expect(screen.getByText('Transações')).toBeInTheDocument()
     expect(screen.getByText('A Receber')).toBeInTheDocument()
+    expect(screen.getByText('Relatórios')).toBeInTheDocument()
+    expect(screen.getByText('Projeções')).toBeInTheDocument()
     expect(screen.getByText('Config')).toBeInTheDocument()
   })
 
@@ -31,10 +33,10 @@ describe('Sidebar', () => {
     expect(screen.getByRole('navigation')).toBeInTheDocument()
   })
 
-  it('should have 4 link elements', () => {
+  it('should have 6 link elements', () => {
     renderWithRouter()
     const links = screen.getAllByRole('link')
-    expect(links).toHaveLength(4)
+    expect(links).toHaveLength(6)
   })
 
   it('should highlight active link', () => {

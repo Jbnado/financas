@@ -23,6 +23,9 @@
   --color-accent: #1e293b;
   --color-accent-foreground: #f1f5f9;
 
+  --color-popover: #1e293b;
+  --color-popover-foreground: #f1f5f9;
+
   --color-positive: #6ee7a0;
   --color-negative: #fca5a5;
   --color-warning: #fcd34d;

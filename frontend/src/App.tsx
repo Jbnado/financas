@@ -6,10 +6,12 @@ import { routes } from '@/routes'
 import { BottomNav } from '@/shared/components/BottomNav'
 import { Sidebar } from '@/shared/components/Sidebar'
 import { Fab } from '@/shared/components/Fab'
+import { TransactionFormWrapper } from '@/features/transaction/components/TransactionFormWrapper'
 import { Toaster } from '@/shared/components/ui/toaster'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { useUIStore } from '@/shared/stores/ui.store'
 import { useAuthStore } from '@/shared/stores/auth.store'
+import { useTransactionFormStore } from '@/features/transaction/stores/transaction-form.store'
 import { navItems } from '@/shared/constants/navigation'
 
 function PageSkeleton() {
@@ -39,6 +41,7 @@ function LocationSync() {
 
 function AppShell() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const openCreate = useTransactionFormStore((s) => s.openCreate)
 
   return (
     <div className="flex min-h-screen bg-background text-foreground font-sans">
@@ -47,7 +50,8 @@ function AppShell() {
         <AppRoutes />
       </main>
       {isAuthenticated && <BottomNav />}
-      {isAuthenticated && <Fab />}
+      {isAuthenticated && <Fab onClick={openCreate} />}
+      {isAuthenticated && <TransactionFormWrapper />}
       <Toaster />
     </div>
   )
