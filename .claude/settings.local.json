@@ -126,7 +126,8 @@
       "Bash(timeout 30 bash:*)",
       "Bash(npx jest@29:*)",
       "Bash(python3:*)",
-      "Bash(E2E_API_BASE=http://localhost:3001/api npx playwright:*)"
+      "Bash(E2E_API_BASE=http://localhost:3001/api npx playwright:*)",
+      "Bash(docker restart:*)"
     ]
   }
 }
