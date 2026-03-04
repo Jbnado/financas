@@ -15,6 +15,15 @@ const mockPrisma = {
     findFirst: jest.fn(),
     update: jest.fn(),
   },
+  fixedExpense: {
+    findMany: jest.fn(),
+  },
+  tax: {
+    findMany: jest.fn(),
+  },
+  receivable: {
+    findMany: jest.fn(),
+  },
 };
 
 describe("BillingCycleService", () => {
@@ -86,8 +95,16 @@ describe("BillingCycleService", () => {
   });
 
   describe("findOne", () => {
-    it("should return cycle with summary", async () => {
-      mockPrisma.billingCycle.findFirst.mockResolvedValue(mockCycle);
+    it("should return cycle with summary (no transactions/entries)", async () => {
+      mockPrisma.billingCycle.findFirst.mockResolvedValue({
+        ...mockCycle,
+        transactions: [],
+        fixedExpenseEntries: [],
+        taxEntries: [],
+      });
+      mockPrisma.fixedExpense.findMany.mockResolvedValue([]);
+      mockPrisma.tax.findMany.mockResolvedValue([]);
+      mockPrisma.receivable.findMany.mockResolvedValue([]);
 
       const result = await service.findOne(userId, "cycle-uuid-1");
 
@@ -97,8 +114,51 @@ describe("BillingCycleService", () => {
         totalCards: "0.00",
         totalFixed: "0.00",
         totalTaxes: "0.00",
+        totalExpenses: "0.00",
         totalReceivables: "0.00",
         netResult: "7300.00",
+      });
+    });
+
+    it("should calculate summary with real data", async () => {
+      const mockCat1 = { id: "cat-1", name: "Alimentação", color: "#f97316" };
+      const mockCat2 = { id: "cat-2", name: "Transporte", color: "#3b82f6" };
+      const mockPm = { id: "pm-1", name: "Nubank" };
+      mockPrisma.billingCycle.findFirst.mockResolvedValue({
+        ...mockCycle,
+        transactions: [
+          { amount: decimal("1000.00"), splits: [{ amount: decimal("200.00") }], category: mockCat1, paymentMethod: mockPm, id: "tx-1", description: "Mercado", date: new Date(), isPaid: true },
+          { amount: decimal("500.00"), splits: [], category: mockCat2, paymentMethod: mockPm, id: "tx-2", description: "Uber", date: new Date(), isPaid: true },
+        ],
+        fixedExpenseEntries: [],
+        taxEntries: [],
+      });
+      mockPrisma.fixedExpense.findMany.mockResolvedValue([
+        { estimatedAmount: decimal("1500.00"), entries: [{ actualAmount: decimal("1450.00") }] },
+        { estimatedAmount: decimal("120.00"), entries: [] }, // fallback to estimated
+      ]);
+      mockPrisma.tax.findMany.mockResolvedValue([
+        { estimatedAmount: decimal("500.00"), entries: [{ actualAmount: decimal("480.00") }] },
+      ]);
+      mockPrisma.receivable.findMany.mockResolvedValue([
+        { amount: decimal("200.00"), paidAmount: decimal("50.00") },
+      ]);
+
+      const result = await service.findOne(userId, "cycle-uuid-1");
+
+      // totalCards = (1000-200) + 500 = 1300
+      // totalFixed = 1450 + 120 = 1570
+      // totalTaxes = 480
+      // totalReceivables = 200-50 = 150
+      // netResult = 7300 - 1300 - 1570 - 480 + 150 = 4100
+      expect(result.summary).toEqual({
+        salary: "7300.00",
+        totalCards: "1300.00",
+        totalFixed: "1570.00",
+        totalTaxes: "480.00",
+        totalExpenses: "3350.00",
+        totalReceivables: "150.00",
+        netResult: "4100.00",
       });
     });
 
@@ -186,6 +246,43 @@ describe("BillingCycleService", () => {
 
       await expect(
         service.close(userId, "nonexistent"),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe("reopen", () => {
+    it("should reopen a closed cycle", async () => {
+      const closedCycle = { ...mockCycle, status: "closed", closedAt: new Date() };
+      mockPrisma.billingCycle.findFirst.mockResolvedValue(closedCycle);
+      const reopenedCycle = { ...mockCycle, status: "open", closedAt: null };
+      mockPrisma.billingCycle.update.mockResolvedValue(reopenedCycle);
+
+      const result = await service.reopen(userId, "cycle-uuid-1");
+
+      expect(result.status).toBe("open");
+      expect(result.closedAt).toBeNull();
+      expect(mockPrisma.billingCycle.update).toHaveBeenCalledWith({
+        where: { id: "cycle-uuid-1" },
+        data: {
+          status: "open",
+          closedAt: null,
+        },
+      });
+    });
+
+    it("should throw BadRequestException when cycle is already open", async () => {
+      mockPrisma.billingCycle.findFirst.mockResolvedValue(mockCycle);
+
+      await expect(
+        service.reopen(userId, "cycle-uuid-1"),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("should throw NotFoundException when cycle not found", async () => {
+      mockPrisma.billingCycle.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.reopen(userId, "nonexistent"),
       ).rejects.toThrow(NotFoundException);
     });
   });

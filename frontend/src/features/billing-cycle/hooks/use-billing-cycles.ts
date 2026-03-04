@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiService } from '@/shared/services/api.service'
-import type { BillingCycle, BillingCycleDetail, CreateBillingCycleDto } from '../types'
+import type { BillingCycle, BillingCycleDetail, CreateBillingCycleDto, UpdateBillingCycleDto } from '../types'
 
 export const BILLING_CYCLES_KEY = ['billing-cycles'] as const
 
@@ -24,6 +24,28 @@ export function useCreateBillingCycle() {
 
   return useMutation<BillingCycle, Error, CreateBillingCycleDto>({
     mutationFn: (dto) => apiService.post<BillingCycle>('/billing-cycles', dto),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: BILLING_CYCLES_KEY })
+    },
+  })
+}
+
+export function useUpdateBillingCycle() {
+  const queryClient = useQueryClient()
+
+  return useMutation<BillingCycle, Error, { id: string; dto: UpdateBillingCycleDto }>({
+    mutationFn: ({ id, dto }) => apiService.put<BillingCycle>(`/billing-cycles/${id}`, dto),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: BILLING_CYCLES_KEY })
+    },
+  })
+}
+
+export function useReopenBillingCycle() {
+  const queryClient = useQueryClient()
+
+  return useMutation<BillingCycle, Error, string>({
+    mutationFn: (id) => apiService.post<BillingCycle>(`/billing-cycles/${id}/reopen`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: BILLING_CYCLES_KEY })
     },

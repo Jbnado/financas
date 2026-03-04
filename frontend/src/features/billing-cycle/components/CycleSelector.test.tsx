@@ -67,4 +67,60 @@ describe('CycleSelector', () => {
     expect(screen.queryByText(/25\/jan/i)).not.toBeInTheDocument()
     expect(screen.getByTestId('cycle-selector-skeleton')).toBeInTheDocument()
   })
+
+  it('should render without popover when no onEdit/onNew provided', () => {
+    render(<CycleSelector {...defaultProps} />)
+
+    // Badge should not be clickable/interactive
+    expect(screen.queryByRole('button', { name: /editar/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /novo ciclo/i })).not.toBeInTheDocument()
+  })
+
+  it('should show popover with edit and new buttons when props provided', async () => {
+    const mockOnEdit = vi.fn()
+    const mockOnNew = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <CycleSelector
+        {...defaultProps}
+        cycleName="Fevereiro 2026"
+        cycleStatus="open"
+        onEdit={mockOnEdit}
+        onNew={mockOnNew}
+      />,
+    )
+
+    // Click the badge to open popover
+    const badge = screen.getByText(/25\/jan/i).closest('div[class*="rounded"]')!
+    await user.click(badge)
+
+    // Popover should show cycle name, edit and new buttons
+    expect(await screen.findByText('Fevereiro 2026')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /editar/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /novo ciclo/i })).toBeInTheDocument()
+  })
+
+  it('should hide edit button when cycle is closed', async () => {
+    const mockOnEdit = vi.fn()
+    const mockOnNew = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <CycleSelector
+        {...defaultProps}
+        cycleName="Janeiro 2026"
+        cycleStatus="closed"
+        onEdit={mockOnEdit}
+        onNew={mockOnNew}
+      />,
+    )
+
+    const badge = screen.getByText(/25\/jan/i).closest('div[class*="rounded"]')!
+    await user.click(badge)
+
+    expect(await screen.findByText('Janeiro 2026')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /editar/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /novo ciclo/i })).toBeInTheDocument()
+  })
 })

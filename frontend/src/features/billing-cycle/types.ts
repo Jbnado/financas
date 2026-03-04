@@ -3,6 +3,7 @@ export interface BillingCycleSummary {
   totalCards: string
   totalFixed: string
   totalTaxes: string
+  totalExpenses: string
   totalReceivables: string
   netResult: string
 }
@@ -19,8 +20,28 @@ export interface BillingCycle {
   updatedAt: string
 }
 
+export interface CategoryBreakdownItem {
+  categoryId: string
+  categoryName: string
+  categoryColor: string | null
+  total: string
+}
+
+export interface RecentTransaction {
+  id: string
+  description: string
+  amount: string
+  userAmount: string
+  date: string
+  isPaid: boolean
+  category: { id: string; name: string; color: string | null }
+  paymentMethod: { id: string; name: string }
+}
+
 export interface BillingCycleDetail extends BillingCycle {
   summary: BillingCycleSummary
+  categoryBreakdown: CategoryBreakdownItem[]
+  recentTransactions: RecentTransaction[]
 }
 
 export interface CreateBillingCycleDto {
@@ -28,4 +49,11 @@ export interface CreateBillingCycleDto {
   startDate: string
   endDate: string
   salary: string
+}
+
+export interface UpdateBillingCycleDto {
+  name?: string
+  startDate?: string
+  endDate?: string
+  salary?: string
 }

@@ -15,6 +15,7 @@ vi.mock('@/shared/services/api.service', async (importOriginal) => {
       get: vi.fn().mockResolvedValue([]),
       post: vi.fn(),
       put: vi.fn(),
+      patch: vi.fn(),
       delete: vi.fn(),
     },
   }
@@ -74,12 +75,22 @@ describe('Routes', () => {
 
     it('should render TransacoesPage at /transacoes', async () => {
       render(<TestRouter initialEntry="/transacoes" />)
-      expect(await screen.findByText(/Transações/i)).toBeInTheDocument()
+      expect(await screen.findByText(/Nenhuma transação neste ciclo/i)).toBeInTheDocument()
     })
 
     it('should render AReceberPage at /a-receber', async () => {
       render(<TestRouter initialEntry="/a-receber" />)
-      expect(await screen.findByText('A Receber — Em breve')).toBeInTheDocument()
+      expect(await screen.findByText('A Receber')).toBeInTheDocument()
+    })
+
+    it('should render ReportsPage at /relatorios', async () => {
+      render(<TestRouter initialEntry="/relatorios" />)
+      expect(await screen.findByText(/nenhum ciclo encontrado/i)).toBeInTheDocument()
+    })
+
+    it('should render ProjecoesPage at /projecoes', async () => {
+      render(<TestRouter initialEntry="/projecoes" />)
+      expect(await screen.findByText('Projeção Financeira')).toBeInTheDocument()
     })
 
     it('should render ConfigPage at /config', async () => {

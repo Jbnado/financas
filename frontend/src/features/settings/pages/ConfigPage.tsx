@@ -1,5 +1,8 @@
 import { useState } from 'react'
+import { Plus } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { Skeleton } from '@/shared/components/ui/skeleton'
 import {
   Dialog,
   DialogContent,
@@ -7,10 +10,14 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/shared/components/ui/dialog'
+import { BillingCycleList } from '../components/BillingCycleList'
 import { CategoryList } from '../components/CategoryList'
 import { usePaymentMethods } from '../hooks/use-payment-methods'
 import { PaymentMethodList } from '../components/PaymentMethodList'
 import { PaymentMethodForm } from '../components/PaymentMethodForm'
+import { PersonList } from '../components/PersonList'
+import { FixedExpenseList } from '../components/FixedExpenseList'
+import { TaxList } from '../components/TaxList'
 import type { PaymentMethod, CreatePaymentMethodData, UpdatePaymentMethodData } from '../types'
 
 export default function ConfigPage() {
@@ -58,26 +65,45 @@ export default function ConfigPage() {
     <div className="flex flex-1 flex-col p-4 gap-6 max-w-2xl mx-auto w-full">
       <h1 className="text-xl font-semibold">Configurações</h1>
 
+      <BillingCycleList />
+
       <CategoryList />
 
-      <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold">Meios de Pagamento</h2>
-          <Button size="sm" onClick={handleAdd}>
-            Adicionar
-          </Button>
-        </div>
+      {isLoading ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Meios de Pagamento</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-12 w-full" />
+            ))}
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <CardTitle className="text-base">Meios de Pagamento</CardTitle>
+            <Button size="sm" onClick={handleAdd} aria-label="Adicionar meio de pagamento">
+              <Plus className="h-4 w-4 mr-1" />
+              Adicionar
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <PaymentMethodList
+              paymentMethods={paymentMethods}
+              onEdit={handleEdit}
+              onRemove={removePaymentMethod}
+            />
+          </CardContent>
+        </Card>
+      )}
 
-        {isLoading ? (
-          <p className="text-sm text-muted-foreground">Carregando...</p>
-        ) : (
-          <PaymentMethodList
-            paymentMethods={paymentMethods}
-            onEdit={handleEdit}
-            onRemove={removePaymentMethod}
-          />
-        )}
-      </section>
+      <PersonList />
+
+      <FixedExpenseList />
+
+      <TaxList />
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>

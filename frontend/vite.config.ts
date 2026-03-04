@@ -6,6 +6,12 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [tailwindcss(), react()],
+  server: {
+    host: true,
+    watch: {
+      usePolling: true,
+    },
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -16,5 +22,6 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
     css: true,
+    exclude: ['e2e/**', 'node_modules/**'],
   },
 })

@@ -65,6 +65,32 @@ async function main() {
     );
   }
 
+  const persons = [
+    { name: "Eu" },
+    { name: "Maria" },
+    { name: "João" },
+  ];
+
+  const existingPersons = await prisma.person.findMany({
+    where: { userId: adminUser.id },
+  });
+
+  if (existingPersons.length === 0) {
+    for (const person of persons) {
+      await prisma.person.create({
+        data: {
+          name: person.name,
+          userId: adminUser.id,
+        },
+      });
+    }
+    console.log(`Seed: ${persons.length} persons created`);
+  } else {
+    console.log(
+      `Seed: persons already exist (${existingPersons.length} found)`,
+    );
+  }
+
   await prisma.$disconnect();
   await pool.end();
 }

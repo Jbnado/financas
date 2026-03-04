@@ -25,7 +25,7 @@ describe('CloseCycleDialog', () => {
       screen.getByText(/fechar ciclo fevereiro 2026/i),
     ).toBeInTheDocument()
     expect(
-      screen.getByText(/esta ação não pode ser desfeita/i),
+      screen.getByText(/será marcado como fechado/i),
     ).toBeInTheDocument()
   })
 
