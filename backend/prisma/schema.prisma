@@ -17,6 +17,9 @@ model User {
   billingCycles  BillingCycle[]
   categories     Category[]
   paymentMethods PaymentMethod[]
+  bankAccounts       BankAccount[]
+  investments        Investment[]
+  patrimonySnapshots PatrimonySnapshot[]
 
   @@map("users")
 }
@@ -38,7 +41,8 @@ model BillingCycle {
   createdAt DateTime           @default(now()) @map("created_at")
   updatedAt DateTime           @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  patrimonySnapshot PatrimonySnapshot?
 
   @@index([userId])
   @@map("billing_cycles")
@@ -79,4 +83,81 @@ model PaymentMethod {
 
   @@index([userId])
   @@map("payment_methods")
+}
+
+enum BankAccountType {
+  checking
+  savings
+  wallet
+}
+
+enum InvestmentType {
+  fixed_income
+  variable_income
+  crypto
+  real_estate
+  other
+}
+
+enum LiquidityType {
+  daily
+  monthly
+  at_maturity
+}
+
+model BankAccount {
+  id          String          @id @default(uuid())
+  userId      String          @map("user_id")
+  name        String
+  institution String
+  type        BankAccountType
+  balance     Decimal         @default(0) @db.Decimal(15, 2)
+  isActive    Boolean         @default(true) @map("is_active")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("bank_accounts")
+}
+
+model Investment {
+  id            String         @id @default(uuid())
+  userId        String         @map("user_id")
+  name          String
+  type          InvestmentType
+  institution   String
+  appliedAmount Decimal        @db.Decimal(15, 2) @map("applied_amount")
+  currentValue  Decimal        @db.Decimal(15, 2) @map("current_value")
+  liquidity     LiquidityType
+  maturityDate  DateTime?      @map("maturity_date")
+  isActive      Boolean        @default(true) @map("is_active")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("investments")
+}
+
+model PatrimonySnapshot {
+  id                 String       @id @default(uuid())
+  userId             String       @map("user_id")
+  billingCycleId     String       @unique @map("billing_cycle_id")
+  totalBankAccounts  Decimal      @db.Decimal(15, 2) @map("total_bank_accounts")
+  totalInvestments   Decimal      @db.Decimal(15, 2) @map("total_investments")
+  totalAssets        Decimal      @db.Decimal(15, 2) @map("total_assets")
+  futureInstallments Decimal      @db.Decimal(15, 2) @map("future_installments")
+  netPatrimony       Decimal      @db.Decimal(15, 2) @map("net_patrimony")
+  snapshotDate       DateTime     @map("snapshot_date")
+  createdAt          DateTime     @default(now()) @map("created_at")
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  billingCycle BillingCycle @relation(fields: [billingCycleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, billingCycleId])
+  @@index([userId])
+  @@map("patrimony_snapshots")
 }

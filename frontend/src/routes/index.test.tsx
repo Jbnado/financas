@@ -7,6 +7,20 @@ import { routes } from './index'
 import { useAuthStore } from '@/shared/stores/auth.store'
 import { clearAccessToken } from '@/shared/services/api.service'
 
+vi.mock('recharts', () => ({
+  PieChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Pie: () => null,
+  Cell: () => null,
+  Tooltip: () => null,
+  Legend: () => null,
+  AreaChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Area: () => null,
+  XAxis: () => null,
+  YAxis: () => null,
+  CartesianGrid: () => null,
+  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}))
+
 vi.mock('@/shared/services/api.service', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/shared/services/api.service')>()
   return {
@@ -15,6 +29,7 @@ vi.mock('@/shared/services/api.service', async (importOriginal) => {
       get: vi.fn().mockResolvedValue([]),
       post: vi.fn(),
       put: vi.fn(),
+      patch: vi.fn(),
       delete: vi.fn(),
     },
   }
@@ -80,6 +95,11 @@ describe('Routes', () => {
     it('should render AReceberPage at /a-receber', async () => {
       render(<TestRouter initialEntry="/a-receber" />)
       expect(await screen.findByText('A Receber — Em breve')).toBeInTheDocument()
+    })
+
+    it('should render PatrimonioPage at /patrimonio', async () => {
+      render(<TestRouter initialEntry="/patrimonio" />)
+      expect(await screen.findByText('Patrimônio')).toBeInTheDocument()
     })
 
     it('should render ConfigPage at /config', async () => {

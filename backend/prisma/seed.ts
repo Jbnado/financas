@@ -65,6 +65,93 @@ async function main() {
     );
   }
 
+  // Seed bank accounts
+  const existingAccounts = await prisma.bankAccount.findMany({
+    where: { userId: adminUser.id },
+  });
+
+  if (existingAccounts.length === 0) {
+    const bankAccounts = [
+      { name: "Nubank CC", institution: "Nubank", type: "checking" as const, balance: 5000 },
+      { name: "Itaú Poupança", institution: "Itaú", type: "savings" as const, balance: 10000 },
+      { name: "PicPay", institution: "PicPay", type: "wallet" as const, balance: 500 },
+    ];
+
+    for (const ba of bankAccounts) {
+      await prisma.bankAccount.create({
+        data: {
+          userId: adminUser.id,
+          name: ba.name,
+          institution: ba.institution,
+          type: ba.type,
+          balance: ba.balance,
+        },
+      });
+    }
+    console.log(`Seed: ${bankAccounts.length} bank accounts created`);
+  } else {
+    console.log(
+      `Seed: bank accounts already exist (${existingAccounts.length} found)`,
+    );
+  }
+
+  // Seed investments
+  const existingInvestments = await prisma.investment.findMany({
+    where: { userId: adminUser.id },
+  });
+
+  if (existingInvestments.length === 0) {
+    const investments = [
+      {
+        name: "Tesouro Selic",
+        type: "fixed_income" as const,
+        institution: "Tesouro Direto",
+        appliedAmount: 20000,
+        currentValue: 21500,
+        liquidity: "daily" as const,
+        maturityDate: new Date("2029-01-01"),
+      },
+      {
+        name: "Ações FII",
+        type: "variable_income" as const,
+        institution: "NuInvest",
+        appliedAmount: 15000,
+        currentValue: 16200,
+        liquidity: "daily" as const,
+        maturityDate: null,
+      },
+      {
+        name: "Bitcoin",
+        type: "crypto" as const,
+        institution: "Binance",
+        appliedAmount: 5000,
+        currentValue: 7800,
+        liquidity: "daily" as const,
+        maturityDate: null,
+      },
+    ];
+
+    for (const inv of investments) {
+      await prisma.investment.create({
+        data: {
+          userId: adminUser.id,
+          name: inv.name,
+          type: inv.type,
+          institution: inv.institution,
+          appliedAmount: inv.appliedAmount,
+          currentValue: inv.currentValue,
+          liquidity: inv.liquidity,
+          maturityDate: inv.maturityDate,
+        },
+      });
+    }
+    console.log(`Seed: ${investments.length} investments created`);
+  } else {
+    console.log(
+      `Seed: investments already exist (${existingInvestments.length} found)`,
+    );
+  }
+
   await prisma.$disconnect();
   await pool.end();
 }

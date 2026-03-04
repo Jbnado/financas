@@ -2,6 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { NotFoundException, BadRequestException } from "@nestjs/common";
 import { BillingCycleService } from "./billing-cycle.service.js";
 import { PrismaService } from "../../prisma/prisma.service.js";
+import { PatrimonyService } from "../patrimony/patrimony.service.js";
 
 // Minimal Decimal-like object for testing (Prisma returns Decimal instances)
 function decimal(value: string) {
@@ -15,6 +16,10 @@ const mockPrisma = {
     findFirst: jest.fn(),
     update: jest.fn(),
   },
+};
+
+const mockPatrimonyService = {
+  createSnapshot: jest.fn(),
 };
 
 describe("BillingCycleService", () => {
@@ -38,6 +43,7 @@ describe("BillingCycleService", () => {
       providers: [
         BillingCycleService,
         { provide: PrismaService, useValue: mockPrisma },
+        { provide: PatrimonyService, useValue: mockPatrimonyService },
       ],
     }).compile();
 
@@ -156,6 +162,7 @@ describe("BillingCycleService", () => {
         closedAt: new Date(),
       };
       mockPrisma.billingCycle.update.mockResolvedValue(closedCycle);
+      mockPatrimonyService.createSnapshot.mockResolvedValue({});
 
       const result = await service.close(userId, "cycle-uuid-1");
 
@@ -168,6 +175,27 @@ describe("BillingCycleService", () => {
           closedAt: expect.any(Date),
         },
       });
+      expect(mockPatrimonyService.createSnapshot).toHaveBeenCalledWith(
+        userId,
+        "cycle-uuid-1",
+      );
+    });
+
+    it("should not fail close if snapshot creation fails", async () => {
+      mockPrisma.billingCycle.findFirst.mockResolvedValue(mockCycle);
+      const closedCycle = {
+        ...mockCycle,
+        status: "closed",
+        closedAt: new Date(),
+      };
+      mockPrisma.billingCycle.update.mockResolvedValue(closedCycle);
+      mockPatrimonyService.createSnapshot.mockRejectedValue(
+        new Error("Snapshot failed"),
+      );
+
+      const result = await service.close(userId, "cycle-uuid-1");
+
+      expect(result.status).toBe("closed");
     });
 
     it("should throw BadRequestException when cycle is already closed", async () => {

@@ -6,10 +6,13 @@ import { AuthModule } from "./modules/auth/auth.module.js";
 import { BillingCycleModule } from "./modules/billing-cycle/billing-cycle.module.js";
 import { CategoryModule } from "./modules/category/category.module.js";
 import { PaymentMethodModule } from "./modules/payment-method/payment-method.module.js";
+import { BankAccountModule } from "./modules/bank-account/bank-account.module.js";
+import { InvestmentModule } from "./modules/investment/investment.module.js";
+import { PatrimonyModule } from "./modules/patrimony/patrimony.module.js";
 import { JwtAuthGuard } from "./modules/auth/guards/jwt-auth.guard.js";
 
 @Module({
-  imports: [PrismaModule, AuthModule, HealthModule, BillingCycleModule, CategoryModule, PaymentMethodModule],
+  imports: [PrismaModule, AuthModule, HealthModule, BillingCycleModule, CategoryModule, PaymentMethodModule, BankAccountModule, InvestmentModule, PatrimonyModule],
   providers: [
     {
       provide: APP_GUARD,

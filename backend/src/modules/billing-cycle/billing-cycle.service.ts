@@ -1,15 +1,22 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   BadRequestException,
 } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service.js";
+import { PatrimonyService } from "../patrimony/patrimony.service.js";
 import type { CreateBillingCycleDto } from "./dto/create-billing-cycle.dto.js";
 import type { UpdateBillingCycleDto } from "./dto/update-billing-cycle.dto.js";
 
 @Injectable()
 export class BillingCycleService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(BillingCycleService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly patrimonyService: PatrimonyService,
+  ) {}
 
   async create(userId: string, dto: CreateBillingCycleDto) {
     return this.prisma.billingCycle.create({
@@ -91,13 +98,24 @@ export class BillingCycleService {
       throw new BadRequestException("Ciclo já está fechado");
     }
 
-    return this.prisma.billingCycle.update({
+    const closed = await this.prisma.billingCycle.update({
       where: { id },
       data: {
         status: "closed",
         closedAt: new Date(),
       },
     });
+
+    try {
+      await this.patrimonyService.createSnapshot(userId, id);
+    } catch (error) {
+      this.logger.error(
+        `Failed to create patrimony snapshot for cycle ${id}`,
+        error instanceof Error ? error.stack : error,
+      );
+    }
+
+    return closed;
   }
 
   async ensureCycleExists(userId: string, targetDate: Date) {
