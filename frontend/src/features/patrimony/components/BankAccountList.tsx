@@ -62,8 +62,14 @@ export function BankAccountList() {
   }
 
   const handleBalanceSave = async (id: string) => {
+    const parsed = parseFloat(balanceValue)
+    if (isNaN(parsed) || balanceValue.trim() === '') {
+      toast.error('Valor inválido')
+      setEditingBalanceId(null)
+      return
+    }
     try {
-      await updateBalance({ id, balance: Number(balanceValue) || 0 })
+      await updateBalance({ id, balance: parsed })
       toast.success('Saldo atualizado')
     } catch {
       toast.error('Erro ao atualizar saldo')
@@ -131,6 +137,7 @@ export function BankAccountList() {
                           step="0.01"
                           value={balanceValue}
                           onChange={(e) => setBalanceValue(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Escape') setEditingBalanceId(null) }}
                           className="w-28 h-8 text-sm"
                           autoFocus
                         />

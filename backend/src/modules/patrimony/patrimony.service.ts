@@ -39,7 +39,27 @@ export class PatrimonyService {
     );
 
     const totalAssets = totalBankAccounts.add(totalInvestments);
-    const futureInstallments = new Decimal(0); // No installment tables in this branch
+
+    // Calculate future installments (unpaid, installmentNumber < totalInstallments)
+    const unpaidInstallments = await this.prisma.transaction.findMany({
+      where: {
+        userId,
+        totalInstallments: { not: null },
+        isPaid: false,
+        date: { gte: new Date() },
+      },
+      select: { amount: true, installmentNumber: true, totalInstallments: true },
+    });
+
+    const futureInstallments = unpaidInstallments
+      .filter(
+        (tx) =>
+          tx.installmentNumber != null &&
+          tx.totalInstallments != null &&
+          tx.installmentNumber < tx.totalInstallments,
+      )
+      .reduce((sum, tx) => sum.add(tx.amount), new Decimal(0));
+
     const netPatrimony = totalAssets.sub(futureInstallments);
 
     return {
@@ -126,8 +146,8 @@ export class PatrimonyService {
       snapshots: snapshots.reverse().map((s) => ({
         cycleName: s.billingCycle.name,
         snapshotDate: s.snapshotDate.toISOString(),
-        totalAssets: s.totalAssets.toString(),
-        netPatrimony: s.netPatrimony.toString(),
+        totalAssets: s.totalAssets.toFixed(2),
+        netPatrimony: s.netPatrimony.toFixed(2),
       })),
     };
   }

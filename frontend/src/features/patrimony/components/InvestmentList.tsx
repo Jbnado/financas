@@ -64,8 +64,14 @@ export function InvestmentList() {
   }
 
   const handleValueSave = async (id: string) => {
+    const parsed = parseFloat(valueInput)
+    if (isNaN(parsed) || valueInput.trim() === '') {
+      toast.error('Valor inválido')
+      setEditingValueId(null)
+      return
+    }
     try {
-      await updateValue({ id, currentValue: Number(valueInput) || 0 })
+      await updateValue({ id, currentValue: parsed })
       toast.success('Valor atualizado')
     } catch {
       toast.error('Erro ao atualizar valor')
@@ -141,6 +147,7 @@ export function InvestmentList() {
                               step="0.01"
                               value={valueInput}
                               onChange={(e) => setValueInput(e.target.value)}
+                              onKeyDown={(e) => { if (e.key === 'Escape') setEditingValueId(null) }}
                               className="w-28 h-8 text-sm"
                               autoFocus
                             />

@@ -15,6 +15,9 @@ const mockPrisma = {
   investment: {
     findMany: jest.fn(),
   },
+  transaction: {
+    findMany: jest.fn(),
+  },
   patrimonySnapshot: {
     create: jest.fn(),
     findMany: jest.fn(),
@@ -47,6 +50,7 @@ describe("PatrimonyService", () => {
         { currentValue: decimal("20000.00") },
         { currentValue: decimal("10000.00") },
       ]);
+      mockPrisma.transaction.findMany.mockResolvedValue([]);
 
       const result = await service.getSummary(userId);
 
@@ -66,9 +70,29 @@ describe("PatrimonyService", () => {
       });
     });
 
+    it("should deduct future installments from net patrimony", async () => {
+      mockPrisma.bankAccount.findMany.mockResolvedValue([
+        { balance: decimal("10000.00") },
+      ]);
+      mockPrisma.investment.findMany.mockResolvedValue([]);
+      const futureDate = new Date();
+      futureDate.setMonth(futureDate.getMonth() + 1);
+      mockPrisma.transaction.findMany.mockResolvedValue([
+        { amount: decimal("500.00"), installmentNumber: 2, totalInstallments: 6 },
+        { amount: decimal("300.00"), installmentNumber: 6, totalInstallments: 6 }, // last — excluded
+      ]);
+
+      const result = await service.getSummary(userId);
+
+      expect(result.totalAssets).toBe("10000.00");
+      expect(result.futureInstallments).toBe("500.00");
+      expect(result.netPatrimony).toBe("9500.00");
+    });
+
     it("should return all zeros when no data exists", async () => {
       mockPrisma.bankAccount.findMany.mockResolvedValue([]);
       mockPrisma.investment.findMany.mockResolvedValue([]);
+      mockPrisma.transaction.findMany.mockResolvedValue([]);
 
       const result = await service.getSummary(userId);
 
@@ -133,6 +157,7 @@ describe("PatrimonyService", () => {
       mockPrisma.investment.findMany.mockResolvedValue([
         { currentValue: decimal("20000.00") },
       ]);
+      mockPrisma.transaction.findMany.mockResolvedValue([]);
 
       const mockSnapshot = {
         id: "snapshot-1",
@@ -195,8 +220,8 @@ describe("PatrimonyService", () => {
       // Should be reversed (chronological order)
       expect(result.snapshots[0].cycleName).toBe("Janeiro 2026");
       expect(result.snapshots[1].cycleName).toBe("Fevereiro 2026");
-      expect(result.snapshots[0].totalAssets).toBe("60000");
-      expect(result.snapshots[0].netPatrimony).toBe("52000");
+      expect(result.snapshots[0].totalAssets).toBe("60000.00");
+      expect(result.snapshots[0].netPatrimony).toBe("52000.00");
 
       expect(mockPrisma.patrimonySnapshot.findMany).toHaveBeenCalledWith({
         where: { userId },

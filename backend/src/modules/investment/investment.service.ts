@@ -32,7 +32,7 @@ export class InvestmentService {
 
   async update(userId: string, id: string, dto: UpdateInvestmentDto) {
     const investment = await this.prisma.investment.findFirst({
-      where: { id, userId },
+      where: { id, userId, isActive: true },
     });
 
     if (!investment) {
@@ -55,7 +55,7 @@ export class InvestmentService {
 
   async remove(userId: string, id: string) {
     const investment = await this.prisma.investment.findFirst({
-      where: { id, userId },
+      where: { id, userId, isActive: true },
     });
 
     if (!investment) {
@@ -70,7 +70,7 @@ export class InvestmentService {
 
   async updateValue(userId: string, id: string, dto: UpdateValueDto) {
     const investment = await this.prisma.investment.findFirst({
-      where: { id, userId },
+      where: { id, userId, isActive: true },
     });
 
     if (!investment) {

@@ -29,7 +29,7 @@ export class BankAccountService {
 
   async update(userId: string, id: string, dto: UpdateBankAccountDto) {
     const account = await this.prisma.bankAccount.findFirst({
-      where: { id, userId },
+      where: { id, userId, isActive: true },
     });
 
     if (!account) {
@@ -48,7 +48,7 @@ export class BankAccountService {
 
   async remove(userId: string, id: string) {
     const account = await this.prisma.bankAccount.findFirst({
-      where: { id, userId },
+      where: { id, userId, isActive: true },
     });
 
     if (!account) {
@@ -63,7 +63,7 @@ export class BankAccountService {
 
   async updateBalance(userId: string, id: string, dto: UpdateBalanceDto) {
     const account = await this.prisma.bankAccount.findFirst({
-      where: { id, userId },
+      where: { id, userId, isActive: true },
     });
 
     if (!account) {

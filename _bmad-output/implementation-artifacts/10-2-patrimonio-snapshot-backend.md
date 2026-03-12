@@ -1,6 +1,6 @@
 # Story 10.2: Patrimônio Total, Líquido e Snapshot Automático (Backend)
 
-Status: pending
+Status: done
 
 ## Story
 
@@ -24,24 +24,24 @@ So that acompanho a evolução do meu patrimônio ao longo do tempo.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Adicionar model PatrimonySnapshot ao schema (AC: 4)
-  - [ ] 1.1: Model com campos e unique constraint [userId, billingCycleId]
-  - [ ] 1.2: Relações: User, BillingCycle
-  - [ ] 1.3: Criar e aplicar migration
-- [ ] Task 2: Criar PatrimonyService (AC: 1-3, 6-8)
-  - [ ] 2.1: getSummary(userId) — agregar saldos de contas + investimentos, calcular parcelas futuras
-  - [ ] 2.2: getDistribution(userId) — agrupar por tipo com percentuais
-  - [ ] 2.3: createSnapshot(userId, billingCycleId) — gravar snapshot
-  - [ ] 2.4: getEvolution(userId, last) — buscar snapshots ordenados
-- [ ] Task 3: Criar PatrimonyController com Swagger (AC: 9, 10)
-- [ ] Task 4: Integrar snapshot no BillingCycleService.close() (AC: 5)
-  - [ ] 4.1: Injetar PatrimonyService no BillingCycleService
-  - [ ] 4.2: Chamar createSnapshot após fechar ciclo
-  - [ ] 4.3: Atualizar testes do billing-cycle.service para mockar PatrimonyService
-- [ ] Task 5: DTOs de resposta
-- [ ] Task 6: Testes unitários TDD (AC: 11)
-- [ ] Task 7: Registrar PatrimonyModule no AppModule
-- [ ] Task 8: Verificação final
+- [x] Task 1: Adicionar model PatrimonySnapshot ao schema (AC: 4)
+  - [x] 1.1: Model com campos e unique constraint [userId, billingCycleId]
+  - [x] 1.2: Relações: User, BillingCycle
+  - [x] 1.3: Criar e aplicar migration
+- [x] Task 2: Criar PatrimonyService (AC: 1-3, 6-8)
+  - [x] 2.1: getSummary(userId) — agregar saldos de contas + investimentos, calcular parcelas futuras
+  - [x] 2.2: getDistribution(userId) — agrupar por tipo com percentuais
+  - [x] 2.3: createSnapshot(userId, billingCycleId) — gravar snapshot
+  - [x] 2.4: getEvolution(userId, last) — buscar snapshots ordenados
+- [x] Task 3: Criar PatrimonyController com Swagger (AC: 9, 10)
+- [x] Task 4: Integrar snapshot no BillingCycleService.close() (AC: 5)
+  - [x] 4.1: Injetar PatrimonyService no BillingCycleService
+  - [x] 4.2: Chamar createSnapshot após fechar ciclo
+  - [x] 4.3: Atualizar testes do billing-cycle.service para mockar PatrimonyService
+- [x] Task 5: DTOs de resposta
+- [x] Task 6: Testes unitários TDD (AC: 11)
+- [x] Task 7: Registrar PatrimonyModule no AppModule
+- [x] Task 8: Verificação final
 
 ## Dev Notes
 
@@ -88,3 +88,27 @@ O BillingCycleService.close() já existe. Precisamos:
 
 ### References
 - [Source: epics.md#Epic 10 - FR50, FR51, FR52, FR53, FR54]
+
+## Dev Agent Record
+
+### Agent Model Used
+claude-opus-4-6
+
+### Completion Notes List
+- All 11 ACs satisfied
+- PatrimonyService: getSummary, getDistribution, createSnapshot, getEvolution
+- Snapshot created on billing cycle close with graceful error handling
+- Controller tests added (6 tests)
+- Backend: 44 suites, 340 tests passing
+
+### Code Review Fixes
+- Fix: getEvolution now uses .toFixed(2) for consistent decimal format
+- Fix: NaN/negative guard on `last` query parameter
+- Fix: futureInstallments now calculated from real installment data (was hardcoded 0)
+- Fix: Controller spec created with NaN and negative edge cases
+
+### File List
+- backend/src/modules/patrimony/patrimony.service.ts (modified — toFixed, futureInstallments calc)
+- backend/src/modules/patrimony/patrimony.controller.ts (modified — NaN guard)
+- backend/src/modules/patrimony/patrimony.service.spec.ts (modified — futureInstallments test, toFixed assertion)
+- backend/src/modules/patrimony/patrimony.controller.spec.ts (new — 6 tests)

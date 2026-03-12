@@ -48,7 +48,8 @@ export class PatrimonyController {
     @Query("last") last?: string,
   ) {
     const user = req.user as { id: string };
-    const count = last ? parseInt(last, 10) : 6;
+    const parsed = last ? parseInt(last, 10) : 6;
+    const count = isNaN(parsed) || parsed <= 0 ? 6 : parsed;
     return this.service.getEvolution(user.id, count);
   }
 }
