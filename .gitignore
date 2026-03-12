@@ -34,7 +34,7 @@ coverage/
 *.pid
 
 # Bmad
-.bmad/
+_bmad/
 
 # Claude
 .claude/
