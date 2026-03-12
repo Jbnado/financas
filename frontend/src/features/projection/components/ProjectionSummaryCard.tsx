@@ -45,14 +45,14 @@ export function ProjectionSummaryCard({ projections, isLoading }: ProjectionSumm
         <div className="rounded-xl p-3" style={{ backgroundColor: '#0f172a' }}>
           <p className="text-xs text-muted-foreground">Pior Mês</p>
           <p className="text-sm font-medium text-muted-foreground">{worst.cycleName}</p>
-          <p className="text-lg font-bold" style={{ color: '#fca5a5' }}>
+          <p className="text-lg font-bold" style={{ color: parseFloat(worst.projectedNetResult) >= 0 ? '#6ee7a0' : '#fca5a5' }}>
             {formatCurrency(worst.projectedNetResult)}
           </p>
         </div>
         <div className="rounded-xl p-3" style={{ backgroundColor: '#0f172a' }}>
           <p className="text-xs text-muted-foreground">Melhor Mês</p>
           <p className="text-sm font-medium text-muted-foreground">{best.cycleName}</p>
-          <p className="text-lg font-bold" style={{ color: '#6ee7a0' }}>
+          <p className="text-lg font-bold" style={{ color: parseFloat(best.projectedNetResult) >= 0 ? '#6ee7a0' : '#fca5a5' }}>
             {formatCurrency(best.projectedNetResult)}
           </p>
         </div>

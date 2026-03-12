@@ -34,15 +34,20 @@ const mockCommitments = {
   commitments: [],
 }
 
+const { useProjectionMock, useInstallmentCommitmentsMock } = vi.hoisted(() => ({
+  useProjectionMock: vi.fn(() => ({
+    data: undefined as typeof mockProjection | undefined,
+    isLoading: false,
+  })),
+  useInstallmentCommitmentsMock: vi.fn(() => ({
+    data: undefined as typeof mockCommitments | undefined,
+    isLoading: false,
+  })),
+}))
+
 vi.mock('../hooks/use-projection', () => ({
-  useProjection: vi.fn(() => ({
-    data: mockProjection,
-    isLoading: false,
-  })),
-  useInstallmentCommitments: vi.fn(() => ({
-    data: mockCommitments,
-    isLoading: false,
-  })),
+  useProjection: useProjectionMock,
+  useInstallmentCommitments: useInstallmentCommitmentsMock,
 }))
 
 function createWrapper() {
@@ -55,6 +60,11 @@ function createWrapper() {
 }
 
 describe('ProjecoesPage', () => {
+  beforeEach(() => {
+    useProjectionMock.mockReturnValue({ data: mockProjection, isLoading: false })
+    useInstallmentCommitmentsMock.mockReturnValue({ data: mockCommitments, isLoading: false })
+  })
+
   it('should render page title', () => {
     render(<ProjecoesPage />, { wrapper: createWrapper() })
     expect(screen.getByText('Projeção Financeira')).toBeInTheDocument()
@@ -100,5 +110,29 @@ describe('ProjecoesPage', () => {
     const select = screen.getByLabelText('Horizonte')
     await user.selectOptions(select, '12')
     expect((select as HTMLSelectElement).value).toBe('12')
+  })
+
+  it('should show empty state when projections array is empty', () => {
+    useProjectionMock.mockReturnValue({
+      data: { projections: [], alerts: [] },
+      isLoading: false,
+    })
+    render(<ProjecoesPage />, { wrapper: createWrapper() })
+    expect(screen.getByText('Sem dados para projeção')).toBeInTheDocument()
+    expect(screen.queryByLabelText('Horizonte')).not.toBeInTheDocument()
+  })
+
+  it('should show empty state when all salaries are zero', () => {
+    useProjectionMock.mockReturnValue({
+      data: {
+        projections: [
+          { cycleName: 'Abril 2026', projectedSalary: '0.00', projectedFixedExpenses: '0.00', projectedTaxes: '0.00', projectedInstallments: '0.00', projectedNetResult: '0.00' },
+        ],
+        alerts: [],
+      },
+      isLoading: false,
+    })
+    render(<ProjecoesPage />, { wrapper: createWrapper() })
+    expect(screen.getByText('Sem dados para projeção')).toBeInTheDocument()
   })
 })

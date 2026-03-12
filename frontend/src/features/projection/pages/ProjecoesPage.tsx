@@ -20,7 +20,7 @@ export default function ProjecoesPage() {
   const alerts = projection?.alerts ?? []
   const commitmentList = commitments?.commitments ?? []
 
-  const isEmpty = !projLoading && projections.length > 0 && projections.every((p) => p.projectedSalary === '0.00')
+  const isEmpty = !projLoading && (projections.length === 0 || projections.every((p) => p.projectedSalary === '0.00'))
 
   return (
     <div className="flex flex-1 flex-col p-4">

@@ -19,7 +19,10 @@ interface ProjectionChartProps {
 }
 
 function shortName(name: string): string {
-  return name.split(' ')[0]?.substring(0, 3) ?? name
+  const parts = name.split(' ')
+  const month = parts[0]?.substring(0, 3) ?? name
+  const year = parts[1]?.slice(-2) ?? ''
+  return year ? `${month}/${year}` : month
 }
 
 function CustomTooltip({ active, payload }: { active?: boolean; payload?: Array<{ payload: ProjectionEntry & { netNum: number } }> }) {
