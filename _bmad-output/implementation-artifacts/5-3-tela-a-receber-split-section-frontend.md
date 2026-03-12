@@ -1,6 +1,6 @@
 # Story 5.3: Tela A Receber e SplitSection no Formulario (Frontend)
 
-Status: review
+Status: done
 
 ## Story
 

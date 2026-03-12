@@ -28,7 +28,7 @@ export class TaxService {
 
   async findOne(userId: string, id: string) {
     const tax = await this.prisma.tax.findFirst({
-      where: { id, userId },
+      where: { id, userId, isActive: true },
     });
     if (!tax) throw new NotFoundException("Tax not found");
     return tax;

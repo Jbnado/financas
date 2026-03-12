@@ -1,6 +1,6 @@
 # Story 4.1: Model de Transacao e CRUD Backend
 
-Status: review
+Status: done
 
 ## Story
 
@@ -152,3 +152,4 @@ Claude Opus 4.6
 ## Change Log
 
 - 2026-03-03: Story 4.1 implementada — Transaction model + CRUD backend completo com validacao de ciclo fechado, hard delete com cascata, toggle-paid, e endpoint de listagem por ciclo
+- 2026-03-12: Code Review fixes — (M1) Added closed cycle check to `remove` method, preventing deletion from closed cycles. (M2) Added positive amount validation to CreateTransactionDto. Backend: 313 tests, zero regressions.

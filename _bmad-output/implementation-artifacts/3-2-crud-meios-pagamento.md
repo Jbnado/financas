@@ -1,6 +1,6 @@
 # Story 3.2: CRUD de Meios de Pagamento (Backend + Frontend)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -147,3 +147,4 @@ enum PaymentMethodType {
 ## Change Log
 
 - 2026-02-27: Implemented Story 3.2 — CRUD de Meios de Pagamento (Backend + Frontend). Added Prisma model, migration, NestJS module with full CRUD, Swagger docs, frontend hooks/components with TanStack Query and React Hook Form. All tests passing.
+- 2026-03-12: Code Review fixes — (M1) Added `isActive: true` filter to `findOne`, `update`, `remove` to prevent operating on soft-deleted items. (M3) Added error toast tests for update/remove mutations. (L1) Changed `removePaymentMethod` from `mutate` to `mutateAsync` for consistency. Backend: 310 tests, Frontend: 329 tests — zero regressions.

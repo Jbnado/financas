@@ -7,8 +7,22 @@ import {
   IsOptional,
   IsInt,
   Min,
+  Max,
+  Validate,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
 } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+
+@ValidatorConstraint({ name: "isPositiveNumberString", async: false })
+class IsPositiveNumberString implements ValidatorConstraintInterface {
+  validate(value: string) {
+    return typeof value === "string" && !isNaN(Number(value)) && Number(value) > 0;
+  }
+  defaultMessage() {
+    return "amount must be a positive number";
+  }
+}
 
 export class CreateTransactionDto {
   @ApiPropertyOptional({
@@ -24,9 +38,10 @@ export class CreateTransactionDto {
   @IsNotEmpty()
   description!: string;
 
-  @ApiProperty({ example: "125.50", description: "Amount as decimal string" })
+  @ApiProperty({ example: "125.50", description: "Amount as positive decimal string" })
   @IsNumberString()
   @IsNotEmpty()
+  @Validate(IsPositiveNumberString)
   amount!: string;
 
   @ApiProperty({ example: "2026-03-01T00:00:00.000Z" })
@@ -51,10 +66,11 @@ export class CreateTransactionDto {
   @Min(1)
   installmentNumber?: number;
 
-  @ApiPropertyOptional({ example: 3 })
+  @ApiPropertyOptional({ example: 3, description: "Number of installments (2-48)" })
   @IsOptional()
   @IsInt()
-  @Min(1)
+  @Min(2)
+  @Max(48)
   totalInstallments?: number;
 
   @ApiPropertyOptional({ example: "uuid" })

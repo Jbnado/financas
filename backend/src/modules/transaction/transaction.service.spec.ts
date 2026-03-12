@@ -323,7 +323,10 @@ describe("TransactionService", () => {
 
   describe("remove", () => {
     it("should hard-delete a simple transaction", async () => {
-      mockPrisma.transaction.findFirst.mockResolvedValue(mockTransaction);
+      mockPrisma.transaction.findFirst.mockResolvedValue({
+        ...mockTransaction,
+        billingCycle: mockCycleOpen,
+      });
       mockPrisma.transaction.delete.mockResolvedValue(mockTransaction);
 
       const result = await service.remove(userId, "tx-uuid-1");
@@ -341,6 +344,7 @@ describe("TransactionService", () => {
         totalInstallments: 3,
         installmentNumber: 1,
         parentTransactionId: null,
+        billingCycle: mockCycleOpen,
       };
       mockPrisma.transaction.findFirst.mockResolvedValue(parentTx);
       mockPrisma.transaction.deleteMany.mockResolvedValue({ count: 2 });
@@ -354,6 +358,17 @@ describe("TransactionService", () => {
       expect(mockPrisma.transaction.delete).toHaveBeenCalledWith({
         where: { id: "tx-uuid-1" },
       });
+    });
+
+    it("should throw BadRequestException when cycle is closed", async () => {
+      mockPrisma.transaction.findFirst.mockResolvedValue({
+        ...mockTransaction,
+        billingCycle: mockCycleClosed,
+      });
+
+      await expect(service.remove(userId, "tx-uuid-1")).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it("should throw NotFoundException when transaction not found", async () => {

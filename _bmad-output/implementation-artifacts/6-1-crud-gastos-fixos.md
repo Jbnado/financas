@@ -1,6 +1,6 @@
 # Story 6.1: CRUD de Gastos Fixos (Backend + Frontend)
 
-Status: review
+Status: done
 
 ## Story
 

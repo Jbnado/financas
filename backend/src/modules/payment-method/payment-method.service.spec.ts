@@ -97,7 +97,7 @@ describe("PaymentMethodService", () => {
 
       expect(result).toEqual(mockPaymentMethod);
       expect(mockPrisma.paymentMethod.findFirst).toHaveBeenCalledWith({
-        where: { id: "pm-uuid-1", userId },
+        where: { id: "pm-uuid-1", userId, isActive: true },
       });
     });
 

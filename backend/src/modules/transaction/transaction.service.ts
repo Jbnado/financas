@@ -197,10 +197,17 @@ export class TransactionService {
   async remove(userId: string, id: string) {
     const transaction = await this.prisma.transaction.findFirst({
       where: { id, userId },
+      include: { billingCycle: true },
     });
 
     if (!transaction) {
       throw new NotFoundException("Transaction not found");
+    }
+
+    if (transaction.billingCycle.status === "closed") {
+      throw new BadRequestException(
+        "Cannot delete transaction from a closed billing cycle",
+      );
     }
 
     // If this is a parent transaction with installments, delete unpaid future children

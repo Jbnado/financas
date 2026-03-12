@@ -34,7 +34,7 @@ export class FixedExpenseService {
 
   async findOne(userId: string, id: string) {
     const expense = await this.prisma.fixedExpense.findFirst({
-      where: { id, userId },
+      where: { id, userId, isActive: true },
     });
     if (!expense) throw new NotFoundException("Fixed expense not found");
     return expense;

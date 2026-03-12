@@ -75,8 +75,8 @@ export default function TransacoesPage() {
       <TransactionList
         transactions={transactions}
         isLoading={txLoading}
-        onTogglePaid={togglePaid}
-        onDelete={deleteTransaction}
+        onTogglePaid={(id) => { togglePaid(id).catch(() => {}) }}
+        onDelete={(id) => { deleteTransaction(id).catch(() => {}) }}
         onEdit={openEdit}
         onAddClick={() => {}}
       />

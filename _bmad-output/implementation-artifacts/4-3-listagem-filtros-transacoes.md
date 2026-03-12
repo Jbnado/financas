@@ -1,6 +1,6 @@
 # Story 4.3: Listagem e Filtros de Transacoes (Backend + Frontend)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -168,3 +168,8 @@ claude-opus-4-6
 - frontend/src/features/transaction/components/TransactionFilters.tsx (new)
 - frontend/src/features/transaction/pages/TransacoesPage.tsx (modified — full implementation)
 - frontend/src/routes/index.test.tsx (modified — updated assertions)
+
+## Change Log
+
+- 2026-03-03: Story 4.3 implementada — filtros, listagem agrupada, TransactionItem, hook completo
+- 2026-03-12: Code Review fix — (M1) Changed deleteTransaction/togglePaid from mutate to mutateAsync for consistency. Added .catch() wrappers in TransacoesPage and TransactionFormWrapper to prevent unhandled rejections.

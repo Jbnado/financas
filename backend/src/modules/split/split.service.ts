@@ -132,6 +132,23 @@ export class SplitService {
       where: { transactionId },
     });
 
+    // Also delete splits from child installments if this is a parent
+    if (
+      transaction.totalInstallments &&
+      transaction.totalInstallments > 1 &&
+      !transaction.parentTransactionId
+    ) {
+      const childIds = await this.prisma.transaction.findMany({
+        where: { parentTransactionId: transactionId },
+        select: { id: true },
+      });
+      if (childIds.length > 0) {
+        await this.prisma.split.deleteMany({
+          where: { transactionId: { in: childIds.map((c) => c.id) } },
+        });
+      }
+    }
+
     // Create new splits
     return this.createSplits(userId, transactionId, dto);
   }

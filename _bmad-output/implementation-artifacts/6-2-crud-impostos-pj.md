@@ -1,6 +1,6 @@
 # Story 6.2: CRUD de Impostos PJ (Backend + Frontend)
 
-Status: review
+Status: done
 
 ## Story
 

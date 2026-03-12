@@ -46,6 +46,18 @@ describe("CreateTransactionDto", () => {
     expect(errors[0].property).toBe("amount");
   });
 
+  it("should fail when amount is zero", async () => {
+    const errors = await validate(toDto({ ...validData, amount: "0" }));
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors[0].property).toBe("amount");
+  });
+
+  it("should fail when amount is negative", async () => {
+    const errors = await validate(toDto({ ...validData, amount: "-50.00" }));
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors[0].property).toBe("amount");
+  });
+
   it("should fail when date is not a valid date string", async () => {
     const errors = await validate(toDto({ ...validData, date: "not-a-date" }));
     expect(errors.length).toBeGreaterThan(0);
@@ -79,6 +91,29 @@ describe("CreateTransactionDto", () => {
   it("should pass with optional installment fields", async () => {
     const errors = await validate(
       toDto({ ...validData, installmentNumber: 1, totalInstallments: 3 }),
+    );
+    expect(errors).toHaveLength(0);
+  });
+
+  it("should fail when totalInstallments is 1", async () => {
+    const errors = await validate(
+      toDto({ ...validData, totalInstallments: 1 }),
+    );
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors[0].property).toBe("totalInstallments");
+  });
+
+  it("should fail when totalInstallments exceeds 48", async () => {
+    const errors = await validate(
+      toDto({ ...validData, totalInstallments: 49 }),
+    );
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors[0].property).toBe("totalInstallments");
+  });
+
+  it("should pass with totalInstallments at boundary 48", async () => {
+    const errors = await validate(
+      toDto({ ...validData, totalInstallments: 48 }),
     );
     expect(errors).toHaveLength(0);
   });

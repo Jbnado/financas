@@ -48,7 +48,7 @@ export function usePaymentMethods() {
     isLoading,
     createPaymentMethod: createMutation.mutateAsync,
     updatePaymentMethod: updateMutation.mutateAsync,
-    removePaymentMethod: removeMutation.mutate,
+    removePaymentMethod: removeMutation.mutateAsync,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
     isRemoving: removeMutation.isPending,

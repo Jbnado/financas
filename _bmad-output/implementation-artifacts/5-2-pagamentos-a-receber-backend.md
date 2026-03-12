@@ -1,6 +1,6 @@
 # Story 5.2: Pagamentos de A Receber (Backend)
 
-Status: review
+Status: done
 
 ## Story
 

@@ -110,6 +110,36 @@ describe('usePaymentMethods', () => {
     expect(toast.success).toHaveBeenCalledWith('Meio de pagamento atualizado')
   })
 
+  it('should show error toast on update failure', async () => {
+    vi.mocked(apiService.get).mockResolvedValue([mockPaymentMethod])
+    vi.mocked(apiService.put).mockRejectedValueOnce(new Error('fail'))
+
+    const { result } = renderHook(() => usePaymentMethods(), { wrapper: createWrapper() })
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+    await act(async () => {
+      await result.current.updatePaymentMethod({ id: 'pm-1', data: { name: 'X' } }).catch(() => {})
+    })
+
+    expect(toast.error).toHaveBeenCalledWith('Erro ao atualizar meio de pagamento')
+  })
+
+  it('should show error toast on remove failure', async () => {
+    vi.mocked(apiService.get).mockResolvedValue([mockPaymentMethod])
+    vi.mocked(apiService.delete).mockRejectedValueOnce(new Error('fail'))
+
+    const { result } = renderHook(() => usePaymentMethods(), { wrapper: createWrapper() })
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+    await act(async () => {
+      await result.current.removePaymentMethod('pm-1').catch(() => {})
+    })
+
+    expect(toast.error).toHaveBeenCalledWith('Erro ao remover meio de pagamento')
+  })
+
   it('should remove a payment method', async () => {
     vi.mocked(apiService.get).mockResolvedValue([mockPaymentMethod])
     vi.mocked(apiService.delete).mockResolvedValueOnce({ ...mockPaymentMethod, isActive: false })
@@ -119,10 +149,10 @@ describe('usePaymentMethods', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
     await act(async () => {
-      result.current.removePaymentMethod('pm-1')
+      await result.current.removePaymentMethod('pm-1')
     })
 
-    await waitFor(() => expect(apiService.delete).toHaveBeenCalledWith('/payment-methods/pm-1'))
+    expect(apiService.delete).toHaveBeenCalledWith('/payment-methods/pm-1')
     expect(toast.success).toHaveBeenCalledWith('Meio de pagamento removido')
   })
 })

@@ -1,6 +1,6 @@
 # Story 6.3: Integracao de Fixos e Impostos no Resumo do Ciclo
 
-Status: review
+Status: done
 
 ## Story
 

@@ -1,6 +1,6 @@
 # Story 4.2: Parcelas Automaticas (Backend)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -139,3 +139,4 @@ Claude Opus 4.6
 ## Change Log
 
 - 2026-03-03: Story 4.2 implementada — InstallmentService com distribuicao de centavos, integracao com TransactionService.create para geracao automatica de parcelas em ciclos futuros
+- 2026-03-12: Code Review fix — (M1) Changed totalInstallments validation from @Min(1) to @Min(2) @Max(48) per spec. Added 3 boundary tests.

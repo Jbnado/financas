@@ -1,6 +1,6 @@
 # Story 5.1: Model de Split e Logica de A Receber (Backend)
 
-Status: review
+Status: done
 
 ## Story
 

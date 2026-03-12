@@ -27,7 +27,7 @@ export class PaymentMethodService {
 
   async findOne(userId: string, id: string) {
     const paymentMethod = await this.prisma.paymentMethod.findFirst({
-      where: { id, userId },
+      where: { id, userId, isActive: true },
     });
 
     if (!paymentMethod) {
@@ -39,7 +39,7 @@ export class PaymentMethodService {
 
   async update(userId: string, id: string, dto: UpdatePaymentMethodDto) {
     const paymentMethod = await this.prisma.paymentMethod.findFirst({
-      where: { id, userId },
+      where: { id, userId, isActive: true },
     });
 
     if (!paymentMethod) {
@@ -59,7 +59,7 @@ export class PaymentMethodService {
 
   async remove(userId: string, id: string) {
     const paymentMethod = await this.prisma.paymentMethod.findFirst({
-      where: { id, userId },
+      where: { id, userId, isActive: true },
     });
 
     if (!paymentMethod) {

@@ -113,7 +113,7 @@ export function TransactionFormWrapper() {
     toast.success(`Registrado — ${data.description} ${formatCurrency(result.amount)}${installmentInfo}`, {
       action: {
         label: 'Desfazer',
-        onClick: () => deleteTransaction(result.id),
+        onClick: () => { deleteTransaction(result.id).catch(() => {}) },
       },
       duration: 5000,
     })
