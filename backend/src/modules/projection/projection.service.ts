@@ -27,12 +27,14 @@ export interface InstallmentCommitment {
   installmentCount: number;
 }
 
+const MAX_PROJECTION_MONTHS = 12;
+
 @Injectable()
 export class ProjectionService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getProjection(userId: string, months: number) {
-    const clampedMonths = Math.min(Math.max(months, 1), 12);
+    const clampedMonths = Math.min(Math.max(months, 1), MAX_PROJECTION_MONTHS);
 
     // Get latest cycle salary
     const latestCycle = await this.prisma.billingCycle.findFirst({
@@ -104,12 +106,12 @@ export class ProjectionService {
 
   async getInstallmentCommitments(userId: string) {
     const { byMonth: installmentsByMonth, countByMonth: countsByMonth } =
-      await this.getFutureInstallments(userId, 12);
+      await this.getFutureInstallments(userId, MAX_PROJECTION_MONTHS);
 
     const commitments: InstallmentCommitment[] = [];
 
     const now = new Date();
-    for (let i = 1; i <= 12; i++) {
+    for (let i = 1; i <= MAX_PROJECTION_MONTHS; i++) {
       const futureDate = new Date(now.getFullYear(), now.getMonth() + i, 1);
       const monthKey = this.getMonthKey(futureDate);
       const total = installmentsByMonth.get(monthKey);
@@ -139,12 +141,11 @@ export class ProjectionService {
       0,
     );
 
-    // Find all unpaid future installment transactions (children with parentTransactionId)
-    const futureInstallments = await this.prisma.transaction.findMany({
+    // Find all unpaid future installment transactions
+    const allFutureInstallments = await this.prisma.transaction.findMany({
       where: {
         userId,
         totalInstallments: { not: null },
-        parentTransactionId: { not: null },
         isPaid: false,
         date: {
           gte: futureStart,
@@ -152,6 +153,14 @@ export class ProjectionService {
         },
       },
     });
+
+    // AC3: only include where installmentNumber < totalInstallments
+    const futureInstallments = allFutureInstallments.filter(
+      (tx) =>
+        tx.installmentNumber != null &&
+        tx.totalInstallments != null &&
+        tx.installmentNumber < tx.totalInstallments,
+    );
 
     const byMonth = new Map<string, number>();
     const countByMonth = new Map<string, number>();

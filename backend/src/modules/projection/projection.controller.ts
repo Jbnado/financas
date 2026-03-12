@@ -8,6 +8,10 @@ import {
 } from "@nestjs/swagger";
 import type { Request } from "express";
 import { ProjectionService } from "./projection.service.js";
+import {
+  ProjectionResponseDto,
+  InstallmentCommitmentsResponseDto,
+} from "./dto/projection-response.dto.js";
 
 @ApiTags("projections")
 @ApiBearerAuth()
@@ -17,7 +21,7 @@ export class ProjectionController {
 
   @Get()
   @ApiOperation({ summary: "Financial projection for upcoming months" })
-  @ApiResponse({ status: 200, description: "Projection data with alerts" })
+  @ApiResponse({ status: 200, description: "Projection data with alerts", type: ProjectionResponseDto })
   @ApiQuery({
     name: "months",
     required: false,
@@ -26,7 +30,8 @@ export class ProjectionController {
   })
   async getProjection(@Req() req: Request, @Query("months") months?: string) {
     const user = req.user as { id: string };
-    const count = months ? parseInt(months, 10) : 6;
+    const parsed = months ? parseInt(months, 10) : 6;
+    const count = isNaN(parsed) ? 6 : parsed;
     return this.service.getProjection(user.id, count);
   }
 
@@ -35,6 +40,7 @@ export class ProjectionController {
   @ApiResponse({
     status: 200,
     description: "Installment commitments grouped by cycle",
+    type: InstallmentCommitmentsResponseDto,
   })
   async getInstallmentCommitments(@Req() req: Request) {
     const user = req.user as { id: string };

@@ -172,6 +172,43 @@ describe("ProjectionService", () => {
       expect(parseFloat(result.projections[0].projectedInstallments)).toBe(300);
     });
 
+    it("should exclude last installment from projection (AC3)", async () => {
+      const now = new Date();
+      const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 15);
+
+      prisma.billingCycle.findFirst.mockResolvedValue({
+        id: "c1",
+        salary: dec("7000.00"),
+      });
+      prisma.fixedExpense.findMany.mockResolvedValue([]);
+      prisma.tax.findMany.mockResolvedValue([]);
+      prisma.transaction.findMany.mockResolvedValue([
+        {
+          id: "t-last",
+          amount: dec("300.00"),
+          totalInstallments: 6,
+          installmentNumber: 6, // last installment — should be excluded
+          parentTransactionId: "t1",
+          isPaid: false,
+          date: nextMonth,
+        },
+        {
+          id: "t-mid",
+          amount: dec("200.00"),
+          totalInstallments: 6,
+          installmentNumber: 3, // mid installment — should be included
+          parentTransactionId: "t1",
+          isPaid: false,
+          date: nextMonth,
+        },
+      ]);
+
+      const result = await service.getProjection("user1", 1);
+
+      // Only the mid installment (200) should be counted, not the last (300)
+      expect(parseFloat(result.projections[0].projectedInstallments)).toBe(200);
+    });
+
     it("should include cycleName in Portuguese format", async () => {
       prisma.billingCycle.findFirst.mockResolvedValue(null);
       prisma.fixedExpense.findMany.mockResolvedValue([]);

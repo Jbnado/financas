@@ -249,6 +249,30 @@ test.describe('Projections Page', () => {
     }
   })
 
+  // --- Edge Cases ---
+
+  test('projection API should handle non-numeric months gracefully', async ({ request }) => {
+    const result = await apiGet<{
+      projections: Array<{ cycleName: string }>
+    }>(request, '/projections?months=abc', token)
+    // Should fallback to default 6
+    expect(result.projections).toHaveLength(6)
+  })
+
+  test('projection API should handle months=0 by clamping to 1', async ({ request }) => {
+    const result = await apiGet<{
+      projections: Array<{ cycleName: string }>
+    }>(request, '/projections?months=0', token)
+    expect(result.projections).toHaveLength(1)
+  })
+
+  test('projection API should handle negative months by clamping to 1', async ({ request }) => {
+    const result = await apiGet<{
+      projections: Array<{ cycleName: string }>
+    }>(request, '/projections?months=-5', token)
+    expect(result.projections).toHaveLength(1)
+  })
+
   // --- Net Result Calculation ---
 
   test('projection net result should equal salary minus all expenses', async ({ request }) => {
